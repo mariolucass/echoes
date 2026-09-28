@@ -1,4 +1,4 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   listDecisions,
   softDeleteDecision,
@@ -22,6 +22,7 @@ import {
   decisionDetailSchema,
   draftResponseSchema,
   alternativeResponseSchema,
+  alternativeParamsSchema,
   metricResponseSchema,
   reviewResponseSchema,
 } from "../../schemas/decisions/decision.schema.js";
@@ -29,6 +30,9 @@ import {
   createDraft,
   getDecisionDetail,
   addAlternative,
+  listAlternatives,
+  getAlternative,
+  deleteAlternative,
   addMetric,
   commitDecision,
   reviewDecision,
@@ -172,6 +176,56 @@ export const addAlternativeRoute = createRoute({
   },
 });
 
+
+export const listAlternativesRoute = createRoute({
+  method: "get",
+  path: "/{id}/alternatives",
+  tags: ["Decisions"],
+  summary: "Lista as alternativas de uma decisão",
+  security: [{ Bearer: [] }],
+  middleware: [authenticate] as const,
+  request: { params: decisionIdParamsSchema },
+  responses: {
+    200: { description: "Consulta de alternativas", content: { "application/json": { schema: z.array(alternativeResponseSchema) } } },
+    401: mutationErrors[401],
+    404: mutationErrors[404],
+    400: { description: "Parâmetros inválidos" },
+  },
+});
+
+export const getAlternativeRoute = createRoute({
+  method: "get",
+  path: "/{id}/alternatives/{alternativeId}",
+  tags: ["Decisions"],
+  summary: "Busca uma alternativa pelo código",
+  security: [{ Bearer: [] }],
+  middleware: [authenticate] as const,
+  request: { params: alternativeParamsSchema },
+  responses: {
+    200: { description: "Consulta de alternativas", content: { "application/json": { schema: alternativeResponseSchema } } },
+    401: mutationErrors[401],
+    404: mutationErrors[404],
+    400: { description: "Parâmetros inválidos" },
+  },
+});
+
+export const deleteAlternativeRoute = createRoute({
+  method: "delete",
+  path: "/{id}/alternatives/{alternativeId}",
+  tags: ["Decisions"],
+  summary: "Exclui uma alternativa do rascunho",
+  security: [{ Bearer: [] }],
+  middleware: [authenticate] as const,
+  request: { params: alternativeParamsSchema },
+  responses: {
+    204: { description: "Alternativa excluída" },
+    400: { description: "Parâmetros inválidos" },
+    401: mutationErrors[401],
+    404: mutationErrors[404],
+    409: mutationErrors[409],
+  },
+});
+
 export const addMetricRoute = createRoute({
   method: "post",
   path: "/{id}/metrics",
@@ -239,6 +293,9 @@ router.openapi(softDeleteDecisionRoute, softDeleteDecision);
 router.openapi(createDraftRoute, createDraft);
 router.openapi(getDecisionDetailRoute, getDecisionDetail);
 router.openapi(addAlternativeRoute, addAlternative);
+router.openapi(listAlternativesRoute, listAlternatives);
+router.openapi(getAlternativeRoute, getAlternative);
+router.openapi(deleteAlternativeRoute, deleteAlternative);
 router.openapi(addMetricRoute, addMetric);
 router.openapi(commitDecisionRoute, commitDecision);
 router.openapi(reviewDecisionRoute, reviewDecision);
