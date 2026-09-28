@@ -477,6 +477,30 @@ Authorization: Bearer <token>
 
 Responde `204` após marcar `deletedAt`; as expectativas, medições e reflexões permanecem no banco. IDs inválidos retornam `422`. Uma decisão inexistente, de outro usuário ou já excluída retorna `404`.
 
+### Gerenciar alternativas de uma decisão
+
+Todas as operações exigem autenticação e uma decisão não excluída do usuário autenticado.
+
+| Operação | Endpoint | Resposta |
+| --- | --- | --- |
+| Cadastrar | `POST /decisions/:id/alternatives` | `201`, alternativa criada |
+| Listar | `GET /decisions/:id/alternatives` | `200`, array de alternativas |
+| Buscar pelo código | `GET /decisions/:id/alternatives/:alternativeId` | `200`, alternativa |
+| Excluir | `DELETE /decisions/:id/alternatives/:alternativeId` | `204`, sem corpo |
+
+`id` é o UUID da decisão e `alternativeId` é o UUID da alternativa.
+O cadastro recebe `title` obrigatório e `description`, `pros` e `cons` opcionais.
+Cadastro e exclusão exigem `DRAFT`; outros estados retornam `409`.
+A exclusão é definitiva e usa a mesma transação com bloqueio da decisão usada no cadastro e na confirmação.
+
+A listagem não possui paginação: retorna as alternativas em ordem crescente de
+`createdAt`, com desempate por `id`, ou `[]` quando não há alternativas.
+Cada objeto contém `id`, `title`, `description`, `pros`, `cons` e `createdAt` em ISO 8601.
+Consultas continuam disponíveis após a confirmação.
+Recursos inexistentes, inacessíveis ou alternativas vinculadas a outra decisão retornam `404`
+(em exclusões de decisões fora de `DRAFT`, a verificação do estado ocorre primeiro).
+Parâmetros inválidos nas novas rotas retornam `400`; token ausente ou inválido retorna `401`.
+
 ### Consultar requisições por data
 
 ```http
