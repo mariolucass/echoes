@@ -1,0 +1,9 @@
+info:
+  name: 02 - Decisions
+  type: folder
+  seq: 2
+
+request:
+  auth:
+    type: bearer
+    token: "{{token}}"

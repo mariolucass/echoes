@@ -1,0 +1,12 @@
+model DecisionTag {
+  decisionId String   @db.Uuid
+  tagId      String   @db.Uuid
+  userId     String   @db.Uuid
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  decision Decision @relation(fields: [decisionId, userId], references: [id, userId], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId, userId], references: [id, userId], onDelete: Cascade)
+
+  @@id([decisionId, tagId])
+  @@index([tagId, userId])
+}

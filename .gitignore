@@ -1,0 +1,10 @@
+node_modules
+.env
+dist
+data/request-logs.jsonl
+coverage
+.vitest
+.prisma
+src/generated/prisma/
+npm-debug.log*
+.DS_Store

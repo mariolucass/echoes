@@ -1,0 +1,34 @@
+info:
+  name: POST - Add Metric
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/metrics"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Salário mensal",
+        "unit": "BRL"
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: metricId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,9 @@
+model RequestLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  timestamp DateTime @default(now()) @db.Timestamptz(3)
+  method    String
+  route     String
+  requestId String?
+
+  @@index([timestamp, id])
+}

@@ -1,0 +1,22 @@
+info:
+  name: PATCH - Update Profile
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/identity/users/me"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bruno Test User Updated"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

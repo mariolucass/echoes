@@ -1,0 +1,6 @@
+allowBuilds:
+  '@prisma/engines': false
+  esbuild: false
+  prisma: false
+minimumReleaseAgeExclude:
+  - '@types/node@24.19.0'

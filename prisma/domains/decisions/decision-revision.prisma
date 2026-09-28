@@ -1,0 +1,11 @@
+model DecisionRevision {
+  id         String   @id @default(uuid()) @db.Uuid
+  decisionId String   @db.Uuid
+  version    Int
+  snapshot   Json     @db.JsonB
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  decision Decision @relation(fields: [decisionId], references: [id], onDelete: Restrict)
+
+  @@unique([decisionId, version])
+}

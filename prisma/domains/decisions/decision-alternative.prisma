@@ -1,0 +1,15 @@
+model DecisionAlternative {
+  id          String   @id @default(uuid()) @db.Uuid
+  decisionId  String   @db.Uuid
+  title       String   @db.VarChar(200)
+  description String?
+  pros        String?
+  cons        String?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  decision  Decision   @relation("DecisionAlternatives", fields: [decisionId], references: [id], onDelete: Cascade)
+  selectedBy Decision[] @relation("ChosenAlternative")
+
+  @@unique([id, decisionId])
+  @@index([decisionId])
+}

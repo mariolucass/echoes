@@ -1,0 +1,23 @@
+info:
+  name: POST - Commit Decision
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/commit"
+  body:
+    type: json
+    data: |-
+      {
+        "chosenAlternativeId": "{{alternativeId}}",
+        "rationale": "Aceitei pelo potencial de crescimento e pela remuneração"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
