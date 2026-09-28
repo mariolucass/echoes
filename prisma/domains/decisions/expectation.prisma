@@ -1,0 +1,15 @@
+model Expectation {
+  id             String   @id @default(uuid()) @db.Uuid
+  description    String
+  expectedImpact Decimal? @db.Decimal(4, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  decisionId     String   @db.Uuid
+
+  decision    Decision                @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  assessments ExpectationAssessment[]
+  targets     ExpectationTarget[]
+
+  @@unique([id, decisionId])
+  @@index([decisionId])
+}

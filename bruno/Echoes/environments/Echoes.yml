@@ -1,0 +1,14 @@
+name: Echoes
+variables:
+  - name: baseUrl
+    value: http://localhost:3333
+    description: URL base da API local
+  - name: testEmail
+    value: bruno.teste@example.com
+    description: E-mail da conta de teste; ajuste antes de registrar
+  - name: testPassword
+    value: EchoesLocal123!
+    description: Senha da conta de teste; ajuste antes de registrar
+  - name: logDate
+    value: 2026-09-27
+    description: Data UTC para consulta dos logs (YYYY-MM-DD)

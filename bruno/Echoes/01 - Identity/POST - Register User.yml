@@ -1,0 +1,43 @@
+info:
+  name: POST - Register User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/identity/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bruno Test User",
+        "email": "{{testEmail}}",
+        "password": "{{testPassword}}"
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.session.accessToken
+        method: jsonq
+      variable:
+        name: token
+        scope: runtime
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.session.refreshToken
+        method: jsonq
+      variable:
+        name: refreshToken
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

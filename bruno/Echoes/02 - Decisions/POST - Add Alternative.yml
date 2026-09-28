@@ -1,0 +1,35 @@
+info:
+  name: POST - Add Alternative
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/alternatives"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Aceitar a oferta",
+        "pros": "Maior remuneração e novos desafios",
+        "cons": "Período de adaptação"
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: alternativeId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

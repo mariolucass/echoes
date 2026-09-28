@@ -1,0 +1,22 @@
+info:
+  name: PATCH - Rename Tag
+  type: http
+  seq: 3
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/classification/tags/{{tagId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Carreira e trabalho"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,42 @@
+info:
+  name: POST - Add Expectation
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/expectations"
+  body:
+    type: json
+    data: |-
+      {
+        "description": "A nova oportunidade vai melhorar minha remuneração",
+        "expectedImpact": 7.5,
+        "targets": [
+          {
+            "metricId": "{{metricId}}",
+            "operator": "GTE",
+            "targetValue": "12000.00",
+            "baselineValue": "9000.00"
+          }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: expectationId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
