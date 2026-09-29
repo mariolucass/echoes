@@ -1,0 +1,449 @@
+:root {
+  --bg: #000;
+  --bg-elevated: #0a0a0a;
+  --fg: #ededed;
+  --muted: #a1a1a1;
+  --subtle: #6b6b6b;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --accent-from: #4f8cff;
+  --accent-to: #a86bff;
+  --accent: linear-gradient(90deg, var(--accent-from), var(--accent-to));
+  --success: #3ecf8e;
+  --warning: #f5a623;
+  --pad: 96px;
+}
+
+.slidev-layout.conference {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 72px var(--pad) 64px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--conference-font-sans, "Geist Variable", sans-serif);
+  font-size: 28px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.conference::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(
+      60% 50% at 50% 0%,
+      rgba(79, 140, 255, 0.14),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 40% at 85% 100%,
+      rgba(168, 107, 255, 0.1),
+      transparent 70%
+    );
+  pointer-events: none;
+}
+.conference.grid-bg::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.conference-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+.conference-eyebrow,
+.eyebrow {
+  margin-bottom: 24px;
+  color: var(--accent-from);
+  font: 500 14px/1.3
+    var(--conference-font-mono, "Geist Mono Variable", monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.conference-footer {
+  position: absolute;
+  bottom: 34px;
+  left: var(--pad);
+  right: var(--pad);
+  display: flex;
+  justify-content: space-between;
+  color: var(--subtle);
+  font: 400 12px/1.4
+    var(--conference-font-mono, "Geist Mono Variable", monospace);
+  letter-spacing: 0.05em;
+}
+.conference h1,
+.conference h2,
+.conference h3,
+.conference p {
+  margin: 0;
+}
+.conference h1 {
+  max-width: 1100px;
+  margin-bottom: 30px;
+  font-size: 76px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.conference h2 {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+.conference h3 {
+  font-size: 27px;
+  font-weight: 500;
+}
+.conference p,
+.conference li {
+  color: var(--muted);
+}
+.conference p + p {
+  margin-top: 20px;
+}
+.conference strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.conference .lead {
+  max-width: 950px;
+  font-size: 34px;
+  line-height: 1.35;
+}
+.conference .caption {
+  margin-top: 22px;
+  color: var(--subtle);
+  font-size: 18px;
+}
+.text-gradient,
+.conference--cover h1,
+.conference--end h1 {
+  background: var(--accent);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.conference ul,
+.conference ol {
+  margin: 0;
+  padding-left: 1.15em;
+}
+.conference li {
+  margin-bottom: 15px;
+  padding-left: 8px;
+}
+.conference li::marker {
+  color: var(--accent-from);
+}
+.conference :not(pre) > code {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-elevated);
+  color: var(--fg);
+  font: 0.8em var(--conference-font-mono, "Geist Mono Variable", monospace);
+  padding: 2px 6px;
+}
+.conference--cover {
+  justify-content: center;
+}
+.conference--cover::before {
+  background:
+    radial-gradient(
+      65% 65% at 45% 38%,
+      rgba(79, 140, 255, 0.23),
+      transparent 72%
+    ),
+    radial-gradient(
+      45% 50% at 80% 80%,
+      rgba(168, 107, 255, 0.16),
+      transparent 75%
+    );
+}
+.conference--cover h1 {
+  margin-bottom: 22px;
+  font-size: 136px;
+  letter-spacing: -0.05em;
+}
+.conference--cover .caption {
+  margin-top: 28px;
+}
+.conference--statement,
+.conference--end {
+  text-align: center;
+}
+.conference--statement .conference-content,
+.conference--end .conference-content {
+  align-items: center;
+}
+.conference--statement h1,
+.conference--end h1 {
+  max-width: 1100px;
+  font-size: 100px;
+  line-height: 1.05;
+}
+.conference--statement .lead,
+.conference--end .lead {
+  max-width: 920px;
+}
+.conference-heading {
+  margin-bottom: 28px;
+}
+.conference-heading h1 {
+  margin-bottom: 0;
+}
+.conference-columns,
+.conference-code-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: stretch;
+}
+.conference-code-columns {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
+  align-items: center;
+}
+.conference-columns > div,
+.conference-code-columns > div {
+  min-width: 0;
+}
+.card {
+  padding: 28px 30px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-elevated);
+}
+.card.active {
+  border-color: var(--border-strong);
+}
+.card h2 {
+  font-size: 34px;
+}
+.card p {
+  font-size: 24px;
+}
+.card p + p {
+  margin-top: 12px;
+}
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.bento.bento-four {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.bento .card {
+  min-height: 158px;
+  padding: 22px 25px;
+}
+.bento .card h2 {
+  color: var(--fg);
+  font: 500 21px/1.25
+    var(--conference-font-mono, "Geist Mono Variable", monospace);
+}
+.bento .card p {
+  font-size: 21px;
+  line-height: 1.3;
+}
+.pill {
+  display: inline-block;
+  padding: 7px 15px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--fg);
+  font: 500 17px/1.2
+    var(--conference-font-mono, "Geist Mono Variable", monospace);
+}
+.pill.accent {
+  border-color: transparent;
+  background: var(--accent);
+  color: #000;
+}
+.stat {
+  color: var(--fg);
+  font-size: 138px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.stat small {
+  display: inline-block;
+  margin-left: 12px;
+  color: var(--muted);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  vertical-align: baseline;
+}
+.stat-label {
+  color: var(--muted);
+  font: 500 16px var(--conference-font-mono, "Geist Mono Variable", monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  align-items: end;
+}
+.stats-row > div {
+  min-width: 0;
+}
+.progress-track {
+  height: 10px;
+  margin-top: 34px;
+  border-radius: 999px;
+  background: #262626;
+  overflow: hidden;
+}
+.progress-track > div {
+  height: 100%;
+  width: 43%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+.status-warning {
+  color: var(--warning) !important;
+}
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  position: relative;
+  margin-top: 30px;
+}
+.stepper::before {
+  content: "";
+  position: absolute;
+  top: 21px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--border-strong);
+}
+.step {
+  position: relative;
+  padding-top: 65px;
+}
+.step::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-from);
+  box-shadow: 0 0 0 8px rgba(79, 140, 255, 0.12);
+}
+.step p {
+  margin-top: 20px;
+  font-size: 24px;
+}
+.timeline {
+  display: grid;
+  gap: 18px;
+}
+.timeline-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: start;
+  gap: 20px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+.timeline-item:last-child {
+  border-bottom: 0;
+}
+.timeline-number {
+  color: var(--accent-from);
+  font: 500 22px var(--conference-font-mono, "Geist Mono Variable", monospace);
+}
+.timeline-item p {
+  font-size: 25px;
+}
+.architecture {
+  display: grid;
+  gap: 10px;
+  max-width: 980px;
+}
+.architecture-row {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 12px 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-elevated);
+}
+.architecture-row strong {
+  min-width: 260px;
+  font-size: 25px;
+}
+.architecture-row span {
+  color: var(--muted);
+  font-size: 21px;
+}
+.conference pre,
+.conference .slidev-code-wrapper {
+  margin: 0;
+  padding: 20px 22px !important;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-elevated) !important;
+}
+.conference pre code {
+  font: 20px/1.35 var(--conference-font-mono, "Geist Mono Variable", monospace);
+}
+.conference-code-caption {
+  font-size: 25px;
+}
+.conference-code-caption h2 {
+  font-size: 35px;
+}
+.conference--code .conference-heading h1 {
+  font-size: 68px;
+}
+.conference--code .caption {
+  font-size: 17px;
+}
+.conference--section h1 {
+  font-size: 92px;
+}
+.slidev-vclick-target {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slidev-vclick-target,
+  .slidev-slides * {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
