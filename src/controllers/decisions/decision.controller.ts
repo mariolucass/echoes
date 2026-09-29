@@ -5,6 +5,9 @@ import type {
   createDraftRoute,
   getDecisionDetailRoute,
   addAlternativeRoute,
+  listAlternativesRoute,
+  getAlternativeRoute,
+  deleteAlternativeRoute,
   addMetricRoute,
   commitDecisionRoute,
   reviewDecisionRoute,
@@ -113,4 +116,20 @@ export const reviewDecision: RouteHandler<
   const response = await decisionService.review(user.id, id, body);
 
   return c.json(response, 201);
+};
+
+export const listAlternatives: RouteHandler<typeof listAlternativesRoute, AppEnv> = async (c) => {
+  const { id } = c.req.valid("param");
+  return c.json(await decisionService.listAlternatives(c.get("user").id, id), 200);
+};
+
+export const getAlternative: RouteHandler<typeof getAlternativeRoute, AppEnv> = async (c) => {
+  const { id, alternativeId } = c.req.valid("param");
+  return c.json(await decisionService.getAlternative(c.get("user").id, id, alternativeId), 200);
+};
+
+export const deleteAlternative: RouteHandler<typeof deleteAlternativeRoute, AppEnv> = async (c) => {
+  const { id, alternativeId } = c.req.valid("param");
+  await decisionService.deleteAlternative(c.get("user").id, id, alternativeId);
+  return c.body(null, 204);
 };

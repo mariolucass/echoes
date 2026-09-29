@@ -65,6 +65,18 @@ export class DecisionService {
     );
   }
 
+  async listAlternatives(userId: string, decisionId: string) {
+    return (await this.repository.listAlternatives(userId, decisionId)).map(toAlternative);
+  }
+
+  async getAlternative(userId: string, decisionId: string, alternativeId: string) {
+    return toAlternative(await this.repository.getAlternative(userId, decisionId, alternativeId));
+  }
+
+  async deleteAlternative(userId: string, decisionId: string, alternativeId: string) {
+    await this.repository.deleteAlternative(userId, decisionId, alternativeId);
+  }
+
   async addMetric(
     userId: string,
     decisionId: string,

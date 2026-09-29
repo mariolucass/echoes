@@ -69,7 +69,7 @@ describe('GET /decisions', () => {
     const token = await signAccessToken('user-123');
     const headers = { Authorization: `Bearer ${token}` };
     const invalid = await app.request('/decisions?page=2abc&limit=0', { headers });
-    expect(invalid.status).toBe(400);
+    expect(invalid.status).toBe(422);
     expect(findMany).not.toHaveBeenCalled();
 
     const defaults = await app.request('/decisions', { headers });

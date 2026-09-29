@@ -245,3 +245,8 @@ export type CreateAlternativeInput = z.infer<typeof createAlternativeSchema>;
 export type CreateMetricInput = z.infer<typeof createMetricSchema>;
 export type CommitDecisionInput = z.infer<typeof commitDecisionSchema>;
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;
+
+export const alternativeParamsSchema = z.object({
+  id: z.uuid(),
+  alternativeId: z.uuid(),
+});

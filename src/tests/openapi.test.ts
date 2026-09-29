@@ -31,6 +31,8 @@ describe("OpenAPI document", () => {
       "/identity/auth/register": { post: expect.any(Object) },
       "/identity/users/me": { patch: expect.any(Object) },
       "/decisions": { get: expect.any(Object), post: expect.any(Object) },
+      "/decisions/{id}/alternatives": { get: expect.any(Object), post: expect.any(Object) },
+      "/decisions/{id}/alternatives/{alternativeId}": { get: expect.any(Object), delete: expect.any(Object) },
       "/decisions/{id}/expectations": { post: expect.any(Object) },
       "/decisions/{id}/tags/{tagId}": { put: expect.any(Object), delete: expect.any(Object) },
       "/tracking/checkpoints": { get: expect.any(Object), post: expect.any(Object) },
@@ -39,8 +41,8 @@ describe("OpenAPI document", () => {
       "/learning/reflections": { get: expect.any(Object) },
       "/classification/tags": { get: expect.any(Object), post: expect.any(Object) },
     });
-    expect(Object.keys(document.paths)).toHaveLength(29);
-    expect(Object.values(document.paths).reduce((count, path) => count + Object.keys(path).length, 0)).toBe(38);
+    expect(Object.keys(document.paths)).toHaveLength(30);
+    expect(Object.values(document.paths).reduce((count, path) => count + Object.keys(path).length, 0)).toBe(41);
     expect(Object.keys(document.paths).every((path) => !path.includes(":"))).toBe(true);
   });
 });
