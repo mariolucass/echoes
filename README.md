@@ -4,6 +4,12 @@ Echoes é uma API para registrar decisões, acompanhar suas consequências ao lo
 
 A proposta do projeto é permitir que decisões sejam revisitadas posteriormente, relacionando o que era esperado no momento da escolha com aquilo que realmente aconteceu.
 
+## Apresentação
+
+A apresentação em Slidev fica em [`docs/slide/`](docs/slide/README.md). Execute `pnpm slides` e abra `http://localhost:3030`.
+
+Edite o conteúdo em [`docs/slide/slides.md`](docs/slide/slides.md) e personalize tema, cores, autor e opções em [`docs/slide/slides.config.md`](docs/slide/slides.config.md). Use `pnpm slides:build` para gerar o site. Para PDF, execute `pnpm slides:setup` uma vez e depois `pnpm slides:export`.
+
 ## Stack
 
 - TypeScript
@@ -299,8 +305,8 @@ src/utils/jwt.ts
 Principais funções:
 
 ```ts
-signAccessToken(userId)
-verifyAccessToken(token)
+signAccessToken(userId);
+verifyAccessToken(token);
 ```
 
 Os access tokens possuem validade de **1 hora**.
@@ -420,15 +426,15 @@ queda do processo devem usar uma outbox gravada na mesma transação da decisão
 
 Toda rota abaixo exige `Authorization: Bearer <accessToken>`. O acesso é restrito ao dono da decisão; IDs inexistentes, de outro usuário ou excluídos retornam `404`. Estado incompatível retorna `409`; corpo inválido ou referência a recurso de outra decisão retorna `422`.
 
-| Etapa | Endpoint | Campos principais | Resposta |
-| --- | --- | --- | --- |
-| Criar rascunho | `POST /decisions` | `title`, `description?`, `context?` | `201`, `id`, `status: DRAFT` |
-| Registrar opção | `POST /decisions/:id/alternatives` | `title`, `description?`, `pros?`, `cons?` | `201`, `id` |
-| Definir métrica | `POST /decisions/:id/metrics` | `name`, `unit?` | `201`, `id` |
-| Definir expectativa | `POST /decisions/:id/expectations` | `description`, `expectedImpact?`, `targets?` | `201`, `id` |
-| Confirmar escolha | `POST /decisions/:id/commit` | `chosenAlternativeId`, `rationale` | `200`, `status: ACTIVE`, `revisionId` |
-| Registrar revisão | `POST /decisions/:id/reviews` | `outcome`, `measurements?`, `assessments`, `reflection?`, `complete?` | `201`, IDs criados e estado |
-| Consultar histórico | `GET /decisions/:id` | — | `200`, decisão e relações |
+| Etapa               | Endpoint                           | Campos principais                                                     | Resposta                              |
+| ------------------- | ---------------------------------- | --------------------------------------------------------------------- | ------------------------------------- |
+| Criar rascunho      | `POST /decisions`                  | `title`, `description?`, `context?`                                   | `201`, `id`, `status: DRAFT`          |
+| Registrar opção     | `POST /decisions/:id/alternatives` | `title`, `description?`, `pros?`, `cons?`                             | `201`, `id`                           |
+| Definir métrica     | `POST /decisions/:id/metrics`      | `name`, `unit?`                                                       | `201`, `id`                           |
+| Definir expectativa | `POST /decisions/:id/expectations` | `description`, `expectedImpact?`, `targets?`                          | `201`, `id`                           |
+| Confirmar escolha   | `POST /decisions/:id/commit`       | `chosenAlternativeId`, `rationale`                                    | `200`, `status: ACTIVE`, `revisionId` |
+| Registrar revisão   | `POST /decisions/:id/reviews`      | `outcome`, `measurements?`, `assessments`, `reflection?`, `complete?` | `201`, IDs criados e estado           |
+| Consultar histórico | `GET /decisions/:id`               | —                                                                     | `200`, decisão e relações             |
 
 Uma meta em `targets` tem `metricId`, `operator` (`GTE`, `LTE` ou `EQ`), `targetValue`, e opcionalmente `baselineValue` e `evaluateAt` (data ISO 8601). Valores de métricas e metas são strings decimais de até quatro casas, por exemplo `"12000.00"`. Impactos são números entre `-10` e `10`, com até duas casas. Para confirmar, a decisão precisa ter ao menos uma alternativa e uma expectativa; a alternativa escolhida deve pertencer à decisão. A confirmação cria `DecisionRevision` versão 1, um snapshot imutável da escolha e das condições iniciais, na mesma transação que muda o estado para `ACTIVE`.
 
@@ -507,12 +513,12 @@ Todas as rotas aceitam requisições apenas de segunda a sexta. Aos sábados e d
 
 Todas as rotas abaixo exigem `Authorization: Bearer <accessToken>`. A consulta por `decisionId` aceita apenas decisões do usuário autenticado que não foram excluídas. IDs de recursos de outro usuário retornam `404`.
 
-| Domínio | Rotas |
-| --- | --- |
-| Tracking | `GET/POST /tracking/checkpoints`, `GET/PATCH/DELETE /tracking/checkpoints/:id`, `GET /tracking/metrics`, `GET /tracking/metrics/:id`, `GET/POST /tracking/metrics/:id/measurements` |
-| Learning | `GET /learning/outcomes`, `GET /learning/outcomes/:id`, `GET /learning/outcomes/:id/assessments`, `GET /learning/reflections`, `GET /learning/reflections/:id` |
-| Classification | `GET/POST /classification/tags`, `PATCH/DELETE /classification/tags/:id`, `GET /decisions/:id/tags`, `PUT/DELETE /decisions/:id/tags/:tagId` |
-| Identity | `PATCH /identity/users/me` |
+| Domínio        | Rotas                                                                                                                                                                               |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tracking       | `GET/POST /tracking/checkpoints`, `GET/PATCH/DELETE /tracking/checkpoints/:id`, `GET /tracking/metrics`, `GET /tracking/metrics/:id`, `GET/POST /tracking/metrics/:id/measurements` |
+| Learning       | `GET /learning/outcomes`, `GET /learning/outcomes/:id`, `GET /learning/outcomes/:id/assessments`, `GET /learning/reflections`, `GET /learning/reflections/:id`                      |
+| Classification | `GET/POST /classification/tags`, `PATCH/DELETE /classification/tags/:id`, `GET /decisions/:id/tags`, `PUT/DELETE /decisions/:id/tags/:tagId`                                        |
+| Identity       | `PATCH /identity/users/me`                                                                                                                                                          |
 
 As listagens de tracking e learning exigem `?decisionId=<uuid>`. Checkpoints podem ser criados e alterados enquanto a decisão está em `DRAFT` ou `ACTIVE`; medições avulsas exigem `ACTIVE`. Resultados, avaliações e reflexões são criados juntos pela rota de revisão da decisão. A atualização de perfil aceita somente `name`.
 

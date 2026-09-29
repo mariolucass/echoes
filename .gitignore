@@ -8,3 +8,5 @@ coverage
 src/generated/prisma/
 npm-debug.log*
 .DS_Store
+docs/slide/exports/
+.slidev/
