@@ -1,2 +1,2 @@
-# O parser Markdown genérico pode reescrever o frontmatter entre slides.
-docs/slides.md
+# O Slidev usa blocos de frontmatter por slide; o formatter Markdown os altera.
+docs/slide/slides.md

@@ -9,12 +9,12 @@ import {
   decisionTagParams,
   tagResponse,
 } from "../../schemas/classification/tag.schema.js";
-import { TagService } from "../../services/classification/tag.service.js";
+import { listDecisionTags, attachDecisionTag, detachDecisionTag } from "../../controllers/decisions/decision-tag.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
 
-const list = createRoute({
+export const listDecisionTagsRoute = createRoute({
   method: "get",
   path: "/{id}/tags",
   tags: ["Classification"],
@@ -30,7 +30,7 @@ const list = createRoute({
   },
 });
 
-const attach = createRoute({
+export const attachDecisionTagRoute = createRoute({
   method: "put",
   path: "/{id}/tags/{tagId}",
   tags: ["Classification"],
@@ -46,7 +46,7 @@ const attach = createRoute({
   },
 });
 
-const detach = createRoute({
+export const detachDecisionTagRoute = createRoute({
   method: "delete",
   path: "/{id}/tags/{tagId}",
   tags: ["Classification"],
@@ -56,21 +56,7 @@ const detach = createRoute({
   responses: { 204: { description: "Vínculo removido" }, ...routeErrors },
 });
 
-router.openapi(list, async (c) =>
-  c.json(
-    await TagService.listForDecision(c.get("user").id, c.req.valid("param").id),
-    200,
-  ),
-);
-
-router.openapi(attach, async (c) => {
-  const { id, tagId } = c.req.valid("param");
-  return c.json(await TagService.attach(c.get("user").id, id, tagId), 200);
-});
-
-router.openapi(detach, async (c) => {
-  const { id, tagId } = c.req.valid("param");
-  await TagService.detach(c.get("user").id, id, tagId);
-  return c.body(null, 204);
-});
+router.openapi(listDecisionTagsRoute, listDecisionTags);
+router.openapi(attachDecisionTagRoute, attachDecisionTag);
+router.openapi(detachDecisionTagRoute, detachDecisionTag);
 export default router;

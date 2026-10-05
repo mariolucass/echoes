@@ -67,9 +67,9 @@ async function requireCheckpointWritable(userId: string, decisionId: string) {
 export const TrackingService = {
   async listCheckpoints(userId: string, decisionId: string) {
     await requireOwnedDecision(userId, decisionId);
-    return (await checkpoints.findManyOwned(userId, decisionId)).map(
-      checkpointView,
-    );
+    const data = await checkpoints.findManyOwned(userId, decisionId);
+
+    return data.map(checkpointView);
   },
 
   async createCheckpoint(
@@ -77,11 +77,15 @@ export const TrackingService = {
     input: z.infer<typeof checkpointInput>,
   ) {
     await requireCheckpointWritable(userId, input.decisionId);
-    return checkpointView(await checkpoints.create(input));
+    const data = await checkpoints.create(input);
+
+    return checkpointView(data);
   },
 
   async getCheckpoint(userId: string, id: string) {
-    return checkpointView(await ownedCheckpoint(userId, id));
+    const data = await ownedCheckpoint(userId, id);
+
+    return checkpointView(data);
   },
 
   async patchCheckpoint(
@@ -91,28 +95,33 @@ export const TrackingService = {
   ) {
     const item = await ownedCheckpoint(userId, id);
     await requireCheckpointWritable(userId, item.decisionId);
-    return checkpointView(await checkpoints.update(id, input));
+
+    const data = await checkpoints.update(id, input);
+
+    return checkpointView(data);
   },
 
   async deleteCheckpoint(userId: string, id: string) {
     const item = await ownedCheckpoint(userId, id);
     await requireCheckpointWritable(userId, item.decisionId);
+
     await checkpoints.delete(id);
   },
 
   async listMetrics(userId: string, decisionId: string) {
     await requireOwnedDecision(userId, decisionId);
-    return (await metrics.findManyOwned(userId, decisionId)).map(
-      ({ createdAt, updatedAt, ...item }) => ({
-        ...item,
-        createdAt: createdAt.toISOString(),
-        updatedAt: updatedAt.toISOString(),
-      }),
-    );
+    const data = await metrics.findManyOwned(userId, decisionId);
+
+    return data.map(({ createdAt, updatedAt, ...item }) => ({
+      ...item,
+      createdAt: createdAt.toISOString(),
+      updatedAt: updatedAt.toISOString(),
+    }));
   },
 
   async getMetric(userId: string, id: string) {
     const { createdAt, updatedAt, ...item } = await ownedMetric(userId, id);
+
     return {
       ...item,
       createdAt: createdAt.toISOString(),
@@ -127,16 +136,19 @@ export const TrackingService = {
   ) {
     const metric = await ownedMetric(userId, id);
     const decision = await requireOwnedDecision(userId, metric.decisionId);
+
     if (decision.status !== "ACTIVE") {
       throw new ConflictError("Decision must be ACTIVE for this operation.");
     }
-    return measurementView(await metrics.createMeasurement(id, input));
+    const data = await metrics.createMeasurement(id, input);
+
+    return measurementView(data);
   },
 
   async listMeasurements(userId: string, id: string) {
     await ownedMetric(userId, id);
-    return (await metrics.findMeasurementsOwned(userId, id)).map(
-      measurementView,
-    );
+    const data = await metrics.findMeasurementsOwned(userId, id);
+
+    return data.map(measurementView);
   },
 };

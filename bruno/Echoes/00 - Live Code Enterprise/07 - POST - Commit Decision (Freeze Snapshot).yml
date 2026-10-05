@@ -1,0 +1,23 @@
+info:
+  name: 07 - POST - Commit Decision (Freeze Snapshot)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/commit"
+  body:
+    type: json
+    data: |-
+      {
+        "chosenAlternativeId": "{{chosenAlternativeId}}",
+        "rationale": "Aprovado pelo comitê técnico devido à necessidade crítica de escalabilidade no fechamento financeiro."
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

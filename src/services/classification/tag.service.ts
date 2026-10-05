@@ -24,16 +24,22 @@ async function ownedTag(userId: string, id: string) {
 
 export const TagService = {
   async list(userId: string) {
-    return (await repository.findManyOwned(userId)).map(view);
+    const data = await repository.findManyOwned(userId);
+
+    return data.map(view);
   },
 
   async create(userId: string, name: string) {
-    return view(await repository.create(userId, name));
+    const data = await repository.create(userId, name);
+
+    return view(data);
   },
 
   async update(userId: string, id: string, name: string) {
     await ownedTag(userId, id);
-    return view(await repository.update(userId, id, name));
+    const data = await repository.update(userId, id, name);
+
+    return view(data);
   },
 
   async remove(userId: string, id: string) {
@@ -43,9 +49,9 @@ export const TagService = {
 
   async listForDecision(userId: string, decisionId: string) {
     await requireOwnedDecision(userId, decisionId);
-    return (await repository.findForDecision(userId, decisionId)).map((link) =>
-      view(link.tag),
-    );
+    const data = await repository.findForDecision(userId, decisionId);
+
+    return data.map((link) => view(link.tag));
   },
 
   async attach(userId: string, decisionId: string, tagId: string) {

@@ -21,6 +21,7 @@ const rawSchema = z.object({
     .default("false")
     .transform((value) => value === "true"),
   CORS_ALLOWED_ORIGINS: z.string().default(""),
+  APP_BASE_URL: z.url().optional(),
 });
 
 const schema = rawSchema.superRefine((data, ctx) => {

@@ -1,0 +1,35 @@
+info:
+  name: 09 - POST - Create Audit Checkpoint
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/tracking/checkpoints"
+  body:
+    type: json
+    data: |-
+      {
+        "decisionId": "{{decisionId}}",
+        "scheduledFor": "2026-11-01T10:00:00.000Z",
+        "notes": "Checkpoint de homologação pós-deploy no ambiente de produção"
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: checkpointId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

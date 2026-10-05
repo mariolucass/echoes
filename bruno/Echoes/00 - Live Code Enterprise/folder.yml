@@ -1,0 +1,9 @@
+info:
+  name: 00 - Live Code Enterprise
+  type: folder
+  seq: 1
+
+request:
+  auth:
+    type: bearer
+    token: "{{token}}"

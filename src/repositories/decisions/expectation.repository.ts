@@ -1,7 +1,5 @@
 import prisma from "../../database/prisma.js";
-import {
-  lockDecision,
-} from "./decision-transaction.repository.js";
+import { lockDecision } from "./decision-transaction.repository.js";
 import { validateExpectationTargets } from "../../middlewares/decisions/index.js";
 import type { CreateExpectationInput } from "../../schemas/decisions/expectation.schema.js";
 

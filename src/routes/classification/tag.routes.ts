@@ -9,12 +9,17 @@ import {
   tagInput,
   tagResponse,
 } from "../../schemas/classification/tag.schema.js";
-import { TagService } from "../../services/classification/tag.service.js";
+import {
+  listTags,
+  createTag,
+  updateTag,
+  removeTag,
+} from "../../controllers/classification/tag.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
 
-const list = createRoute({
+export const listTagsRoute = createRoute({
   method: "get",
   path: "/",
   tags: ["Classification"],
@@ -29,7 +34,7 @@ const list = createRoute({
   },
 });
 
-const create = createRoute({
+export const createTagRoute = createRoute({
   method: "post",
   path: "/",
   tags: ["Classification"],
@@ -45,7 +50,7 @@ const create = createRoute({
   },
 });
 
-const patch = createRoute({
+export const updateTagRoute = createRoute({
   method: "patch",
   path: "/{id}",
   tags: ["Classification"],
@@ -64,7 +69,7 @@ const patch = createRoute({
   },
 });
 
-const remove = createRoute({
+export const removeTagRoute = createRoute({
   method: "delete",
   path: "/{id}",
   tags: ["Classification"],
@@ -74,30 +79,8 @@ const remove = createRoute({
   responses: { 204: { description: "Tag excluída" }, ...routeErrors },
 });
 
-router.openapi(list, async (c) =>
-  c.json(await TagService.list(c.get("user").id), 200),
-);
-
-router.openapi(create, async (c) =>
-  c.json(
-    await TagService.create(c.get("user").id, c.req.valid("json").name),
-    201,
-  ),
-);
-
-router.openapi(patch, async (c) =>
-  c.json(
-    await TagService.update(
-      c.get("user").id,
-      c.req.valid("param").id,
-      c.req.valid("json").name,
-    ),
-    200,
-  ),
-);
-
-router.openapi(remove, async (c) => {
-  await TagService.remove(c.get("user").id, c.req.valid("param").id);
-  return c.body(null, 204);
-});
+router.openapi(listTagsRoute, listTags);
+router.openapi(createTagRoute, createTag);
+router.openapi(updateTagRoute, updateTag);
+router.openapi(removeTagRoute, removeTag);
 export default router;

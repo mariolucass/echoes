@@ -7,8 +7,8 @@ import {
   DecisionStatus,
 } from "../../interfaces/decision/decision.interface.js";
 import { z } from "@hono/zod-openapi";
-import { ExpectationAssessmentResult } from "../../generated/prisma/enums.js";
-import { text, decimal, impact, score } from "./decision-fields.schema.js";
+import { text, score } from "./decision-fields.schema.js";
+import { alternativeResponseSchema } from "./decision-alternative.schema.js";
 import { expectationResponseSchema } from "./expectation.schema.js";
 
 export const decisionQuerySchema = z
@@ -85,16 +85,6 @@ export const createDecisionSchema = z
   .strict()
   .openapi("CreateDecision");
 
-export const createAlternativeSchema = z
-  .object({
-    title: text(200),
-    description: text(5000).optional(),
-    pros: text(5000).optional(),
-    cons: text(5000).optional(),
-  })
-  .strict()
-  .openapi("CreateAlternative");
-
 export const createMetricSchema = z
   .object({
     name: text(100),
@@ -103,81 +93,6 @@ export const createMetricSchema = z
   .strict()
   .openapi("CreateMetric");
 
-export const commitDecisionSchema = z
-  .object({
-    chosenAlternativeId: z.uuid(),
-    rationale: text(5000),
-  })
-  .strict()
-  .openapi("CommitDecision");
-
-const measurementSchema = z
-  .object({
-    metricId: z.uuid(),
-    value: decimal,
-    recordedAt: z.iso.datetime().optional(),
-    notes: text(2000).optional(),
-  })
-  .strict();
-
-const assessmentSchema = z
-  .object({
-    expectationId: z.uuid(),
-    result: z.enum(ExpectationAssessmentResult),
-    notes: text(2000).optional(),
-  })
-  .strict();
-
-const reflectionSchema = z
-  .object({
-    content: text(5000),
-    satisfactionScore: score.optional(),
-    regretScore: score.optional(),
-  })
-  .strict();
-
-export const createReviewSchema = z
-  .object({
-    outcome: z
-      .object({
-        description: text(5000),
-        impact: impact.optional(),
-        occurredAt: z.iso.datetime().optional(),
-      })
-      .strict(),
-    measurements: z.array(measurementSchema).max(24).default([]),
-    assessments: z.array(assessmentSchema).min(1).max(50),
-    reflection: reflectionSchema.optional(),
-    complete: z.boolean().default(false),
-  })
-  .strict()
-  .refine(
-    (data) =>
-      new Set(data.assessments.map((item) => item.expectationId)).size ===
-      data.assessments.length,
-    {
-      path: ["assessments"],
-      error: "Uma expectativa só pode ser avaliada uma vez por resultado",
-    },
-  )
-  .openapi("CreateDecisionReview");
-
-export const reviewResponseSchema = z.object({
-  outcomeId: z.uuid(),
-  assessmentIds: z.array(z.uuid()),
-  measurementIds: z.array(z.uuid()),
-  reflectionId: z.uuid().nullable(),
-  status: z.enum(["ACTIVE", "COMPLETED"]),
-});
-
-export const alternativeResponseSchema = z.object({
-  id: z.uuid(),
-  title: z.string(),
-  description: z.string().nullable(),
-  pros: z.string().nullable(),
-  cons: z.string().nullable(),
-  createdAt: z.iso.datetime(),
-});
 const measurementResponseSchema = z.object({
   id: z.uuid(),
   value: z.string(),
@@ -232,21 +147,7 @@ export const decisionDetailSchema = z
 export const draftResponseSchema = decisionDetailSchema.openapi(
   "CreateDraftResponse",
 );
-export const commitResponseSchema = decisionDetailSchema
-  .extend({
-    revisionId: z.uuid(),
-  })
-  .openapi("CommitDecisionResponse");
-
 export type DecisionDetail = z.infer<typeof decisionDetailSchema>;
 
 export type CreateDecisionInput = z.infer<typeof createDecisionSchema>;
-export type CreateAlternativeInput = z.infer<typeof createAlternativeSchema>;
 export type CreateMetricInput = z.infer<typeof createMetricSchema>;
-export type CommitDecisionInput = z.infer<typeof commitDecisionSchema>;
-export type CreateReviewInput = z.infer<typeof createReviewSchema>;
-
-export const alternativeParamsSchema = z.object({
-  id: z.uuid(),
-  alternativeId: z.uuid(),
-});

@@ -1,22 +1,20 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import type { AppEnv } from "../../interfaces/hono.js";
 import { publicUserSchema } from "../../schemas/identity/auth.schema.js";
 import { protectedRoute, routeErrors } from "../shared/domain-routes.js";
-import { text } from "../../schemas/decisions/decision-fields.schema.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
-import { ProfileService } from "../../services/identity/profile.service.js";
+import { updateProfile } from "../../controllers/identity/user.controller.js";
+import { updateProfileSchema } from "../../schemas/identity/user.schema.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
 
-const input = z.object({ name: text(100) }).strict();
-
-const update = createRoute({
+export const updateProfileRoute = createRoute({
   method: "patch",
   path: "/me",
   tags: ["Identity"],
   summary: "Atualiza o nome do usuário autenticado",
   ...protectedRoute,
-  request: { body: { content: { "application/json": { schema: input } } } },
+  request: { body: { content: { "application/json": { schema: updateProfileSchema } } } },
   responses: {
     200: {
       description: "Perfil atualizado",
@@ -26,7 +24,5 @@ const update = createRoute({
   },
 });
 
-router.openapi(update, async (c) => {
-  return c.json(await ProfileService.updateName(c.get("user").id, c.req.valid("json").name), 200);
-});
+router.openapi(updateProfileRoute, updateProfile);
 export default router;

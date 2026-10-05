@@ -525,7 +525,18 @@ GET /decisions/report.pdf
 Authorization: Bearer <token>
 ```
 
-Retorna `application/pdf` como anexo `decisions.pdf`. O relatório contém a página solicitada de decisões do usuário autenticado e aceita os mesmos parâmetros `page` e `limit` da listagem.
+Retorna `application/pdf` como anexo `echoes-panorama-AAAA-MM-DD.pdf`. O relatório contém a página solicitada de decisões do usuário autenticado e aceita os mesmos filtros, ordenação, `page` e `limit` da listagem. Apresenta distribuição por estado, expectativas atendidas, pendências reais e uma tabela de decisões. Até 12 decisões cabem em uma folha A4; limites maiores continuam nas folhas seguintes. Configure `APP_BASE_URL` com a origem do aplicativo para ativar os links dos IDs curtos na tabela. Os indicadores descrevem somente a página consultada.
+
+### Baixar uma decisão em PDF
+
+```http
+GET /decisions/:id/report.pdf
+Authorization: Bearer <token>
+```
+
+Retorna `application/pdf` como anexo `echoes-decisao-<titulo>-<id-curto>.pdf`, com contexto, justificativa, alternativas, expectativas e metas, avaliações vinculadas aos resultados, medições, reflexões e o registro imutável da confirmação quando disponível. Decisões inexistentes, excluídas ou de outro usuário retornam `404`.
+
+Os dois relatórios indicam a data de emissão e usam o fuso `API_TIME_ZONE`. A síntese de cada expectativa considera a avaliação registrada mais recentemente até a emissão. A comparação numérica usa valores decimais exatos e a última medição até o prazo da meta, ou até a emissão quando o prazo é futuro ou não foi definido. Ela não substitui a avaliação do usuário. Ausência de medição ou avaliação é apresentada como lacuna, sem classificar a decisão como fracasso. As sugestões seguem o estado e as pendências registradas; não atribuem uma pontuação automática de qualidade.
 
 ### Acesso em dias úteis
 

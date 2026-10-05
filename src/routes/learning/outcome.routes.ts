@@ -10,11 +10,11 @@ import {
   outcomeResponse,
   assessmentResponse,
 } from "../../schemas/learning/learning.schema.js";
-import { LearningService } from "../../services/learning/learning.service.js";
+import { listOutcomes, getOutcome, listOutcomeAssessments } from "../../controllers/learning/outcome.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
-const list = createRoute({
+export const listOutcomesRoute = createRoute({
   method: "get",
   path: "/",
   tags: ["Learning"],
@@ -29,7 +29,7 @@ const list = createRoute({
     ...routeErrors,
   },
 });
-const get = createRoute({
+export const getOutcomeRoute = createRoute({
   method: "get",
   path: "/{id}",
   tags: ["Learning"],
@@ -44,7 +44,7 @@ const get = createRoute({
     ...routeErrors,
   },
 });
-const assessments = createRoute({
+export const listOutcomeAssessmentsRoute = createRoute({
   method: "get",
   path: "/{id}/assessments",
   tags: ["Learning"],
@@ -59,28 +59,7 @@ const assessments = createRoute({
     ...routeErrors,
   },
 });
-router.openapi(list, async (c) =>
-  c.json(
-    await LearningService.listOutcomes(
-      c.get("user").id,
-      c.req.valid("query").decisionId,
-    ),
-    200,
-  ),
-);
-router.openapi(get, async (c) =>
-  c.json(
-    await LearningService.getOutcome(c.get("user").id, c.req.valid("param").id),
-    200,
-  ),
-);
-router.openapi(assessments, async (c) =>
-  c.json(
-    await LearningService.listAssessments(
-      c.get("user").id,
-      c.req.valid("param").id,
-    ),
-    200,
-  ),
-);
+router.openapi(listOutcomesRoute, listOutcomes);
+router.openapi(getOutcomeRoute, getOutcome);
+router.openapi(listOutcomeAssessmentsRoute, listOutcomeAssessments);
 export default router;

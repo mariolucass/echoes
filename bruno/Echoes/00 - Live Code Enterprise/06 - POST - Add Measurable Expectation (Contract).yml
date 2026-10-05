@@ -1,0 +1,42 @@
+info:
+  name: 06 - POST - Add Measurable Expectation (Contract)
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/expectations"
+  body:
+    type: json
+    data: |-
+      {
+        "description": "Tempo de resposta deve ficar abaixo de 5 segundos no pico",
+        "expectedImpact": 9.0,
+        "targets": [
+          {
+            "metricId": "{{metricId}}",
+            "operator": "LTE",
+            "baselineValue": "12.0000",
+            "targetValue": "5.0000"
+          }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: expectationId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
