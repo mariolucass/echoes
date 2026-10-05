@@ -1,0 +1,12 @@
+model MetricMeasurement {
+  id         String   @id @default(uuid()) @db.Uuid
+  metricId   String   @db.Uuid
+  value      Decimal  @db.Decimal(18, 4)
+  recordedAt DateTime @db.Timestamptz(3)
+  notes      String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  metric Metric @relation(fields: [metricId], references: [id], onDelete: Cascade)
+
+  @@index([metricId, recordedAt, id])
+}

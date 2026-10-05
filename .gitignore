@@ -1,0 +1,13 @@
+node_modules
+.env
+.env.test
+dist
+data/request-logs.jsonl
+coverage
+.vitest
+.prisma
+src/generated/prisma/
+npm-debug.log*
+.DS_Store
+docs/slide/exports/
+.slidev/

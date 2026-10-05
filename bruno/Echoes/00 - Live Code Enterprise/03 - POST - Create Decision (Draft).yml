@@ -1,0 +1,35 @@
+info:
+  name: 03 - POST - Create Decision (Draft)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Migração da Infraestrutura de Relatórios para Microsserviço de Leitura",
+        "description": "Reduzir tempo de geração de relatórios corporativos e custos de banco",
+        "context": "No fechamento do trimestre, a geração do DRE gerava timeouts de 12s e travava pools de conexão."
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: decisionId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

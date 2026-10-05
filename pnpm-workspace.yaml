@@ -1,0 +1,7 @@
+allowBuilds:
+  '@prisma/engines': false
+  esbuild: false
+  prisma: false
+  playwright-chromium: false
+minimumReleaseAgeExclude:
+  - '@types/node@24.19.0'

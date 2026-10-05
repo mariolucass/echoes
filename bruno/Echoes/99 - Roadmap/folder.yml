@@ -1,0 +1,7 @@
+info:
+  name: 99 - Roadmap (proposed, not implemented)
+  type: folder
+  seq: 99
+
+request:
+  auth: inherit

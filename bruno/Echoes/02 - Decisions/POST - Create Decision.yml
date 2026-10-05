@@ -1,0 +1,35 @@
+info:
+  name: POST - Create Decision
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Trocar de emprego",
+        "description": "Avaliar uma nova oportunidade profissional",
+        "context": "Recebi uma oferta com salário e responsabilidades maiores"
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: decisionId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

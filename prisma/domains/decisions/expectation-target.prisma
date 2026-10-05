@@ -1,0 +1,23 @@
+enum TargetOperator {
+  GTE
+  LTE
+  EQ
+}
+
+model ExpectationTarget {
+  id             String         @id @default(uuid()) @db.Uuid
+  decisionId     String         @db.Uuid
+  expectationId  String         @db.Uuid
+  metricId       String         @db.Uuid
+  operator       TargetOperator
+  targetValue    Decimal        @db.Decimal(18, 4)
+  baselineValue  Decimal?       @db.Decimal(18, 4)
+  evaluateAt     DateTime?      @db.Timestamptz(3)
+  createdAt      DateTime       @default(now()) @db.Timestamptz(3)
+
+  expectation Expectation @relation(fields: [expectationId, decisionId], references: [id, decisionId], onDelete: Cascade)
+  metric      Metric      @relation(fields: [metricId, decisionId], references: [id, decisionId], onDelete: Restrict)
+
+  @@unique([expectationId, metricId])
+  @@index([metricId, decisionId])
+}

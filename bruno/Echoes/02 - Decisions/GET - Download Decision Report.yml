@@ -1,0 +1,16 @@
+info:
+  name: "GET - Download Decision Report "
+  type: http
+  seq: 10
+
+http:
+  method: GET
+  url: "{{baseUrl}}/decisions/1811f7fc-9c90-4987-b420-873e98f32ad1/report.pdf"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
