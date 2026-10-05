@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<{ variant?: string; eyebrow?: string }>()
 const { $slidev, $frontmatter, $page } = useSlideContext()
 const pageLabel = computed(() => String($page.value).padStart(2, '0'))
 const total = computed(() => String($slidev.nav.total).padStart(2, '0'))
-const showFooter = computed(() => !['cover', 'statement', 'end'].includes(props.variant) && $frontmatter.footer !== false)
+const showFooter = computed(() => !['cover', 'statement', 'end', 'livecode'].includes(props.variant) && $frontmatter.footer !== false)
 const fontStyles = computed(() => ({
   '--conference-font-sans': $slidev.configs.fonts.sans.join(', '),
   '--conference-font-mono': $slidev.configs.fonts.mono.join(', '),

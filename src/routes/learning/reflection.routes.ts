@@ -7,12 +7,12 @@ import {
   decisionFilter,
 } from "../shared/domain-routes.js";
 import { reflectionResponse } from "../../schemas/learning/learning.schema.js";
-import { LearningService } from "../../services/learning/learning.service.js";
+import { listReflections, getReflection } from "../../controllers/learning/reflection.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
 
-const list = createRoute({
+export const listReflectionsRoute = createRoute({
   method: "get",
   path: "/",
   tags: ["Learning"],
@@ -28,7 +28,7 @@ const list = createRoute({
   },
 });
 
-const get = createRoute({
+export const getReflectionRoute = createRoute({
   method: "get",
   path: "/{id}",
   tags: ["Learning"],
@@ -44,23 +44,6 @@ const get = createRoute({
   },
 });
 
-router.openapi(list, async (c) =>
-  c.json(
-    await LearningService.listReflections(
-      c.get("user").id,
-      c.req.valid("query").decisionId,
-    ),
-    200,
-  ),
-);
-
-router.openapi(get, async (c) =>
-  c.json(
-    await LearningService.getReflection(
-      c.get("user").id,
-      c.req.valid("param").id,
-    ),
-    200,
-  ),
-);
+router.openapi(listReflectionsRoute, listReflections);
+router.openapi(getReflectionRoute, getReflection);
 export default router;

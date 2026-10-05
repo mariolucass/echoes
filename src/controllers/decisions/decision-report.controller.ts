@@ -1,10 +1,11 @@
 import type { RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../interfaces/hono.js";
-import { DecisionService } from "../../services/decisions/index.js";
 import { DecisionReportService } from "../../services/decisions/index.js";
-import type { downloadDecisionsPdfRoute } from "../../routes/decisions/index.js";
+import type {
+  downloadDecisionsPdfRoute,
+  downloadDecisionPdfRoute,
+} from "../../routes/decisions/decision.routes.js";
 
-const decisionService = new DecisionService();
 const reportService = new DecisionReportService();
 
 export const downloadDecisionsPdf: RouteHandler<
@@ -14,11 +15,26 @@ export const downloadDecisionsPdf: RouteHandler<
   const user = c.get("user");
   const query = c.req.valid("query");
 
-  const { data } = await decisionService.getAllWithoutCount(user.id, query);
-  const pdf = await reportService.createPdf(data);
+  const pdf = await reportService.downloadList(user.id, query);
 
   c.header("Content-Type", "application/pdf");
-  c.header("Content-Disposition", 'attachment; filename="decisions.pdf"');
+  c.header("Content-Disposition", `attachment; filename="${reportService.listFilename()}"`);
+  c.header("Cache-Control", "private, no-store");
+
+  return c.body(new Uint8Array(pdf));
+};
+
+export const downloadDecisionPdf: RouteHandler<
+  typeof downloadDecisionPdfRoute,
+  AppEnv
+> = async (c) => {
+  const { id } = c.req.valid("param");
+
+  const { pdf, filename } = await reportService.downloadDetailWithName(c.get("user").id, id);
+
+  c.header("Content-Type", "application/pdf");
+  c.header("Content-Disposition", `attachment; filename="${filename}"`);
+  c.header("Cache-Control", "private, no-store");
 
   return c.body(new Uint8Array(pdf));
 };

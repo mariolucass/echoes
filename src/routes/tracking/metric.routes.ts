@@ -11,12 +11,12 @@ import {
   measurementResponse,
   metricDetailResponse,
 } from "../../schemas/tracking/tracking.schema.js";
-import { TrackingService } from "../../services/tracking/tracking.service.js";
+import { listMetrics, getMetric, createMeasurement, listMeasurements } from "../../controllers/tracking/metric.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
 
-const list = createRoute({
+export const listMetricsRoute = createRoute({
   method: "get",
   path: "/",
   tags: ["Tracking"],
@@ -32,7 +32,7 @@ const list = createRoute({
   },
 });
 
-const get = createRoute({
+export const getMetricRoute = createRoute({
   method: "get",
   path: "/{id}",
   tags: ["Tracking"],
@@ -48,7 +48,7 @@ const get = createRoute({
   },
 });
 
-const createMeasurement = createRoute({
+export const createMeasurementRoute = createRoute({
   method: "post",
   path: "/{id}/measurements",
   tags: ["Tracking"],
@@ -67,7 +67,7 @@ const createMeasurement = createRoute({
   },
 });
 
-const listMeasurements = createRoute({
+export const listMeasurementsRoute = createRoute({
   method: "get",
   path: "/{id}/measurements",
   tags: ["Tracking"],
@@ -83,41 +83,8 @@ const listMeasurements = createRoute({
   },
 });
 
-router.openapi(list, async (c) =>
-  c.json(
-    await TrackingService.listMetrics(
-      c.get("user").id,
-      c.req.valid("query").decisionId,
-    ),
-    200,
-  ),
-);
-
-router.openapi(get, async (c) =>
-  c.json(
-    await TrackingService.getMetric(c.get("user").id, c.req.valid("param").id),
-    200,
-  ),
-);
-
-router.openapi(createMeasurement, async (c) =>
-  c.json(
-    await TrackingService.createMeasurement(
-      c.get("user").id,
-      c.req.valid("param").id,
-      c.req.valid("json"),
-    ),
-    201,
-  ),
-);
-
-router.openapi(listMeasurements, async (c) =>
-  c.json(
-    await TrackingService.listMeasurements(
-      c.get("user").id,
-      c.req.valid("param").id,
-    ),
-    200,
-  ),
-);
+router.openapi(listMetricsRoute, listMetrics);
+router.openapi(getMetricRoute, getMetric);
+router.openapi(createMeasurementRoute, createMeasurement);
+router.openapi(listMeasurementsRoute, listMeasurements);
 export default router;

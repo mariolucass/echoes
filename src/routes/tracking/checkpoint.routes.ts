@@ -11,14 +11,14 @@ import {
   checkpointPatch,
   checkpointResponse,
 } from "../../schemas/tracking/tracking.schema.js";
-import { TrackingService } from "../../services/tracking/tracking.service.js";
+import { listCheckpoints, createCheckpoint, getCheckpoint, patchCheckpoint, deleteCheckpoint } from "../../controllers/tracking/checkpoint.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
 
 const content = { "application/json": { schema: checkpointResponse } };
 
-const list = createRoute({
+export const listCheckpointsRoute = createRoute({
   method: "get",
   path: "/",
   tags: ["Tracking"],
@@ -34,7 +34,7 @@ const list = createRoute({
   },
 });
 
-const create = createRoute({
+export const createCheckpointRoute = createRoute({
   method: "post",
   path: "/",
   tags: ["Tracking"],
@@ -49,7 +49,7 @@ const create = createRoute({
   },
 });
 
-const get = createRoute({
+export const getCheckpointRoute = createRoute({
   method: "get",
   path: "/{id}",
   tags: ["Tracking"],
@@ -59,7 +59,7 @@ const get = createRoute({
   responses: { 200: { description: "Checkpoint", content }, ...routeErrors },
 });
 
-const patch = createRoute({
+export const patchCheckpointRoute = createRoute({
   method: "patch",
   path: "/{id}",
   tags: ["Tracking"],
@@ -75,7 +75,7 @@ const patch = createRoute({
   },
 });
 
-const remove = createRoute({
+export const deleteCheckpointRoute = createRoute({
   method: "delete",
   path: "/{id}",
   tags: ["Tracking"],
@@ -85,52 +85,9 @@ const remove = createRoute({
   responses: { 204: { description: "Checkpoint excluído" }, ...routeErrors },
 });
 
-router.openapi(list, async (c) =>
-  c.json(
-    await TrackingService.listCheckpoints(
-      c.get("user").id,
-      c.req.valid("query").decisionId,
-    ),
-    200,
-  ),
-);
-
-router.openapi(create, async (c) =>
-  c.json(
-    await TrackingService.createCheckpoint(
-      c.get("user").id,
-      c.req.valid("json"),
-    ),
-    201,
-  ),
-);
-
-router.openapi(get, async (c) =>
-  c.json(
-    await TrackingService.getCheckpoint(
-      c.get("user").id,
-      c.req.valid("param").id,
-    ),
-    200,
-  ),
-);
-
-router.openapi(patch, async (c) =>
-  c.json(
-    await TrackingService.patchCheckpoint(
-      c.get("user").id,
-      c.req.valid("param").id,
-      c.req.valid("json"),
-    ),
-    200,
-  ),
-);
-
-router.openapi(remove, async (c) => {
-  await TrackingService.deleteCheckpoint(
-    c.get("user").id,
-    c.req.valid("param").id,
-  );
-  return c.body(null, 204);
-});
+router.openapi(listCheckpointsRoute, listCheckpoints);
+router.openapi(createCheckpointRoute, createCheckpoint);
+router.openapi(getCheckpointRoute, getCheckpoint);
+router.openapi(patchCheckpointRoute, patchCheckpoint);
+router.openapi(deleteCheckpointRoute, deleteCheckpoint);
 export default router;

@@ -1,0 +1,35 @@
+info:
+  name: 04 - POST - Add Alternative
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/alternatives"
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Arquitetura com Consultas Materializadas e Cache Redis",
+        "pros": "Garantia de latência sub-5s, desacoplamento do banco transacional e estabilidade em pico",
+        "cons": "Esforço inicial de 3 sprints de engenharia e complexidade adicional de cache"
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: chosenAlternativeId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

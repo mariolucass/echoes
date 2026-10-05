@@ -1,9 +1,10 @@
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import {
   listDecisions,
   softDeleteDecision,
 } from "../../controllers/decisions/index.ts";
 import { downloadDecisionsPdf } from "../../controllers/decisions/index.ts";
+import { downloadDecisionPdf } from "../../controllers/decisions/decision-report.controller.js";
 import { authenticate } from "../../middlewares/auth/index.js";
 import type { AppEnv } from "../../interfaces/hono.ts";
 import {
@@ -13,42 +14,22 @@ import {
 } from "../../schemas/decisions/index.ts";
 import { errorResponseSchema } from "../../schemas/shared/index.js";
 import {
-  commitDecisionSchema,
-  commitResponseSchema,
-  createAlternativeSchema,
   createDecisionSchema,
   createMetricSchema,
-  createReviewSchema,
   decisionDetailSchema,
   draftResponseSchema,
-  alternativeResponseSchema,
-  alternativeParamsSchema,
   metricResponseSchema,
-  reviewResponseSchema,
 } from "../../schemas/decisions/decision.schema.js";
 import {
   createDraft,
   getDecisionDetail,
-  addAlternative,
-  listAlternatives,
-  getAlternative,
-  deleteAlternative,
   addMetric,
-  commitDecision,
-  reviewDecision,
 } from "../../controllers/decisions/decision.controller.js";
+import { mutationErrors } from "./decision-route-errors.js";
+import alternativeRoutes from "./decision-alternative.routes.js";
+import lifecycleRoutes from "./decision-lifecycle.routes.js";
 
 const router = new OpenAPIHono<AppEnv>();
-const errorContent = { "application/json": { schema: errorResponseSchema } };
-const mutationErrors = {
-  401: { description: "Token inválido" },
-  404: {
-    description: "Decisão ou recurso não encontrado",
-    content: errorContent,
-  },
-  409: { description: "Estado da decisão incompatível", content: errorContent },
-  422: { description: "Entrada inválida", content: errorContent },
-} as const;
 
 export const listDecisionsRoute = createRoute({
   method: "get",
@@ -91,6 +72,35 @@ export const downloadDecisionsPdfRoute = createRoute({
     403: { description: "Acesso permitido apenas em dias úteis" },
     422: {
       description: "Parâmetros de consulta inválidos",
+      content: { "application/json": { schema: errorResponseSchema } },
+    },
+  },
+});
+
+export const downloadDecisionPdfRoute = createRoute({
+  method: "get",
+  path: "/{id}/report.pdf",
+  tags: ["Decisions"],
+  summary:
+    "Baixa uma decisão em PDF com expectativas, evidências e aprendizados",
+  security: [{ Bearer: [] }],
+  middleware: [authenticate] as const,
+  request: { params: decisionIdParamsSchema },
+  responses: {
+    200: {
+      description: "Relatório individual da decisão",
+      content: {
+        "application/pdf": { schema: { type: "string", format: "binary" } },
+      },
+    },
+    401: { description: "Token ausente ou inválido" },
+    403: { description: "Acesso permitido apenas em dias úteis" },
+    404: {
+      description: "Decisão inexistente, excluída ou de outro usuário",
+      content: { "application/json": { schema: errorResponseSchema } },
+    },
+    422: {
+      description: "ID inválido",
       content: { "application/json": { schema: errorResponseSchema } },
     },
   },
@@ -154,78 +164,6 @@ export const getDecisionDetailRoute = createRoute({
   },
 });
 
-export const addAlternativeRoute = createRoute({
-  method: "post",
-  path: "/{id}/alternatives",
-  tags: ["Decisions"],
-  summary: "Adiciona uma alternativa ao rascunho",
-  security: [{ Bearer: [] }],
-  middleware: [authenticate] as const,
-  request: {
-    params: decisionIdParamsSchema,
-    body: {
-      content: { "application/json": { schema: createAlternativeSchema } },
-    },
-  },
-  responses: {
-    201: {
-      description: "Alternativa criada",
-      content: { "application/json": { schema: alternativeResponseSchema } },
-    },
-    ...mutationErrors,
-  },
-});
-
-
-export const listAlternativesRoute = createRoute({
-  method: "get",
-  path: "/{id}/alternatives",
-  tags: ["Decisions"],
-  summary: "Lista as alternativas de uma decisão",
-  security: [{ Bearer: [] }],
-  middleware: [authenticate] as const,
-  request: { params: decisionIdParamsSchema },
-  responses: {
-    200: { description: "Consulta de alternativas", content: { "application/json": { schema: z.array(alternativeResponseSchema) } } },
-    401: mutationErrors[401],
-    404: mutationErrors[404],
-    400: { description: "Parâmetros inválidos" },
-  },
-});
-
-export const getAlternativeRoute = createRoute({
-  method: "get",
-  path: "/{id}/alternatives/{alternativeId}",
-  tags: ["Decisions"],
-  summary: "Busca uma alternativa pelo código",
-  security: [{ Bearer: [] }],
-  middleware: [authenticate] as const,
-  request: { params: alternativeParamsSchema },
-  responses: {
-    200: { description: "Consulta de alternativas", content: { "application/json": { schema: alternativeResponseSchema } } },
-    401: mutationErrors[401],
-    404: mutationErrors[404],
-    400: { description: "Parâmetros inválidos" },
-  },
-});
-
-export const deleteAlternativeRoute = createRoute({
-  method: "delete",
-  path: "/{id}/alternatives/{alternativeId}",
-  tags: ["Decisions"],
-  summary: "Exclui uma alternativa do rascunho",
-  security: [{ Bearer: [] }],
-  middleware: [authenticate] as const,
-  request: { params: alternativeParamsSchema },
-  responses: {
-    204: { description: "Alternativa excluída" },
-    400: { description: "Parâmetros inválidos" },
-    401: mutationErrors[401],
-    404: mutationErrors[404],
-    409: mutationErrors[409],
-  },
-});
-
 export const addMetricRoute = createRoute({
   method: "post",
   path: "/{id}/metrics",
@@ -246,58 +184,16 @@ export const addMetricRoute = createRoute({
   },
 });
 
-export const commitDecisionRoute = createRoute({
-  method: "post",
-  path: "/{id}/commit",
-  tags: ["Decisions"],
-  summary: "Confirma a escolha e preserva uma versão inicial imutável",
-  security: [{ Bearer: [] }],
-  middleware: [authenticate] as const,
-  request: {
-    params: decisionIdParamsSchema,
-    body: { content: { "application/json": { schema: commitDecisionSchema } } },
-  },
-  responses: {
-    200: {
-      description: "Decisão confirmada",
-      content: { "application/json": { schema: commitResponseSchema } },
-    },
-    ...mutationErrors,
-  },
-});
-
-export const reviewDecisionRoute = createRoute({
-  method: "post",
-  path: "/{id}/reviews",
-  tags: ["Decisions"],
-  summary: "Registra medições, resultado, avaliação e reflexão",
-  security: [{ Bearer: [] }],
-  middleware: [authenticate] as const,
-  request: {
-    params: decisionIdParamsSchema,
-    body: { content: { "application/json": { schema: createReviewSchema } } },
-  },
-  responses: {
-    201: {
-      description: "Revisão registrada",
-      content: { "application/json": { schema: reviewResponseSchema } },
-    },
-    ...mutationErrors,
-  },
-});
-
 router.openapi(listDecisionsRoute, listDecisions);
 router.openapi(downloadDecisionsPdfRoute, downloadDecisionsPdf);
+router.openapi(downloadDecisionPdfRoute, downloadDecisionPdf);
 router.openapi(softDeleteDecisionRoute, softDeleteDecision);
 
 router.openapi(createDraftRoute, createDraft);
 router.openapi(getDecisionDetailRoute, getDecisionDetail);
-router.openapi(addAlternativeRoute, addAlternative);
-router.openapi(listAlternativesRoute, listAlternatives);
-router.openapi(getAlternativeRoute, getAlternative);
-router.openapi(deleteAlternativeRoute, deleteAlternative);
 router.openapi(addMetricRoute, addMetric);
-router.openapi(commitDecisionRoute, commitDecision);
-router.openapi(reviewDecisionRoute, reviewDecision);
+
+router.route("/", alternativeRoutes);
+router.route("/", lifecycleRoutes);
 
 export default router;

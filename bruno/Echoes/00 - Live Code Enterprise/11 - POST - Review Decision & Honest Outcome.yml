@@ -1,0 +1,64 @@
+info:
+  name: 11 - POST - Review Decision & Honest Outcome
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseUrl}}/decisions/{{decisionId}}/reviews"
+  body:
+    type: json
+    data: |-
+      {
+        "outcome": {
+          "description": "Tempo reduziu 25% (para 9s), mas permaneceu acima da meta agressiva de 5s.",
+          "impact": 6
+        },
+        "measurements": [
+          {
+            "metricId": "{{metricId}}",
+            "value": "9.0000",
+            "notes": "Medição consolidada no pico de fim de mês"
+          }
+        ],
+        "assessments": [
+          {
+            "expectationId": "{{expectationId}}",
+            "result": "NOT_MET",
+            "notes": "Meta prometida era LTE 5s. Ficou em 9s (+4s acima do contratado)."
+          }
+        ],
+        "reflection": {
+          "content": "A solução melhorou a carga, mas para bater 5s precisaremos particionar a tabela histórica no Q4.",
+          "satisfactionScore": 7,
+          "regretScore": 2
+        },
+        "complete": true
+      }
+  auth: inherit
+
+runtime:
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.outcomeId
+        method: jsonq
+      variable:
+        name: outcomeId
+        scope: runtime
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.reflectionId
+        method: jsonq
+      variable:
+        name: reflectionId
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

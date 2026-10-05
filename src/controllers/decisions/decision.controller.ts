@@ -4,13 +4,7 @@ import { DecisionService } from "../../services/decisions/index.js";
 import type {
   createDraftRoute,
   getDecisionDetailRoute,
-  addAlternativeRoute,
-  listAlternativesRoute,
-  getAlternativeRoute,
-  deleteAlternativeRoute,
   addMetricRoute,
-  commitDecisionRoute,
-  reviewDecisionRoute,
 } from "../../routes/decisions/decision.routes.js";
 import type {
   listDecisionsRoute,
@@ -67,19 +61,6 @@ export const getDecisionDetail: RouteHandler<
   return c.json(response, 200);
 };
 
-export const addAlternative: RouteHandler<
-  typeof addAlternativeRoute,
-  AppEnv
-> = async (c) => {
-  const user = c.get("user");
-  const { id } = c.req.valid("param");
-  const body = c.req.valid("json");
-
-  const response = await decisionService.addAlternative(user.id, id, body);
-
-  return c.json(response, 201);
-};
-
 export const addMetric: RouteHandler<typeof addMetricRoute, AppEnv> = async (
   c,
 ) => {
@@ -90,46 +71,4 @@ export const addMetric: RouteHandler<typeof addMetricRoute, AppEnv> = async (
   const response = await decisionService.addMetric(user.id, id, body);
 
   return c.json(response, 201);
-};
-
-export const commitDecision: RouteHandler<
-  typeof commitDecisionRoute,
-  AppEnv
-> = async (c) => {
-  const user = c.get("user");
-  const { id } = c.req.valid("param");
-  const body = c.req.valid("json");
-
-  const response = await decisionService.commit(user.id, id, body);
-
-  return c.json(response, 200);
-};
-
-export const reviewDecision: RouteHandler<
-  typeof reviewDecisionRoute,
-  AppEnv
-> = async (c) => {
-  const user = c.get("user");
-  const { id } = c.req.valid("param");
-  const body = c.req.valid("json");
-
-  const response = await decisionService.review(user.id, id, body);
-
-  return c.json(response, 201);
-};
-
-export const listAlternatives: RouteHandler<typeof listAlternativesRoute, AppEnv> = async (c) => {
-  const { id } = c.req.valid("param");
-  return c.json(await decisionService.listAlternatives(c.get("user").id, id), 200);
-};
-
-export const getAlternative: RouteHandler<typeof getAlternativeRoute, AppEnv> = async (c) => {
-  const { id, alternativeId } = c.req.valid("param");
-  return c.json(await decisionService.getAlternative(c.get("user").id, id, alternativeId), 200);
-};
-
-export const deleteAlternative: RouteHandler<typeof deleteAlternativeRoute, AppEnv> = async (c) => {
-  const { id, alternativeId } = c.req.valid("param");
-  await decisionService.deleteAlternative(c.get("user").id, id, alternativeId);
-  return c.body(null, 204);
 };
