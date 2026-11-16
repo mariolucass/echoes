@@ -29,7 +29,10 @@
     "prisma:generate": "node scripts/ensure-prisma-client.mjs --force",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:deploy": "prisma migrate deploy"
+    "prisma:deploy": "prisma migrate deploy",
+    "slides:n2": "slidev docs/slide/slides-n2.config.md --port 3031",
+    "slides:n2:build": "slidev build docs/slide/slides-n2.config.md --out dist-n2",
+    "slides:n2:export": "slidev export docs/slide/slides-n2.config.md --dark --with-clicks --wait 2600 --output docs/slide/exports/echoes-n2.pdf"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
@@ -41,19 +44,26 @@
     "hono": "^4.13.9",
     "hono-pino": "^0.10.3",
     "jose": "^6.2.12",
+    "mongodb": "^7.9.0",
+    "nodemailer": "^10.5.0",
     "pdfkit": "^0.20.2",
     "pg": "^8.23.0",
     "pino": "^10.3.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource-variable/caveat": "^5.3.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/manuale": "^5.3.0",
+    "@fontsource/grenze": "^5.3.0",
     "@slidev/cli": "^53.0.0",
     "@slidev/types": "^53.0.0",
     "@types/node": "^24.19.0",
+    "@types/nodemailer": "^8.0.2",
     "@types/pdfkit": "^0.17.6",
     "@types/pg": "^8.23.1",
     "pino-pretty": "^13.1.3",

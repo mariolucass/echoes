@@ -3,7 +3,7 @@ import type { AppEnv } from "../../interfaces/hono.js";
 import { publicUserSchema } from "../../schemas/identity/auth.schema.js";
 import { protectedRoute, routeErrors } from "../shared/domain-routes.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
-import { updateProfile } from "../../controllers/identity/user.controller.js";
+import { updateAvatar, updateProfile } from "../../controllers/identity/user.controller.js";
 import { updateProfileSchema } from "../../schemas/identity/user.schema.js";
 
 const router = new OpenAPIHono<AppEnv>({ defaultHook });
@@ -24,5 +24,21 @@ export const updateProfileRoute = createRoute({
   },
 });
 
+export const updateAvatarRoute = createRoute({
+  method: "put",
+  path: "/me/avatar",
+  tags: ["Identity"],
+  summary: "Envia a foto de perfil (multipart/form-data, campo `file`) para a nuvem",
+  ...protectedRoute,
+  responses: {
+    200: {
+      description: "Foto enviada; apenas a URL é salva no banco",
+      content: { "application/json": { schema: publicUserSchema } },
+    },
+    ...routeErrors,
+  },
+});
+
+router.openapi(updateAvatarRoute, updateAvatar);
 router.openapi(updateProfileRoute, updateProfile);
 export default router;

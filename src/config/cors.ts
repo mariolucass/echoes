@@ -1,35 +1,36 @@
 import { cors } from "hono/cors";
 import { env } from "./env.js";
 
-const isProduction = env.NODE_ENV === "production";
-
-const PRODUCTION_ORIGINS = env.CORS_ALLOWED_ORIGINS.split(",")
-  .map((origin) => origin.trim())
+/**
+ * CORS restrito ao próprio servidor.
+ * Origens permitidas: a origem da própria API (mesmo host/porta da requisição)
+ * e as listadas em CORS_ALLOWED_ORIGINS (opcional, separadas por vírgula).
+ */
+const configuredOrigins = env.CORS_ALLOWED_ORIGINS.split(",")
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
   .filter(Boolean);
 
-const DEVELOPMENT_ORIGINS = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://127.0.0.1:3001",
-  "http://api.local",
-  "https://api.local",
-  "http://app.local",
-  "https://app.local",
-];
+const allowedOrigins = new Set([
+  `http://localhost:${env.PORT}`,
+  `http://127.0.0.1:${env.PORT}`,
+  ...configuredOrigins,
+]);
 
-if (isProduction && PRODUCTION_ORIGINS.length === 0) {
-  throw new Error("CORS_ALLOWED_ORIGINS não está configurada em produção");
+export function resolveCorsOrigin(
+  origin: string | undefined,
+  requestUrl: string,
+): string | undefined {
+  if (!origin) return undefined;
+  if (allowedOrigins.has(origin)) return origin;
+  try {
+    return new URL(requestUrl).origin === origin ? origin : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
-const allowedOrigins = new Set(
-  isProduction
-    ? PRODUCTION_ORIGINS
-    : [...PRODUCTION_ORIGINS, ...DEVELOPMENT_ORIGINS],
-);
-
 export const corsOptions: Parameters<typeof cors>[0] = {
-  origin: (origin) =>
-    origin && allowedOrigins.has(origin) ? origin : undefined,
+  origin: (origin, c) => resolveCorsOrigin(origin, c.req.url),
   credentials: true,
   allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowHeaders: [
@@ -39,6 +40,6 @@ export const corsOptions: Parameters<typeof cors>[0] = {
     "Accept",
     "X-Session-Id",
   ],
-  exposeHeaders: ["X-Session-Id", "X-Request-Id"],
+  exposeHeaders: ["X-Session-Id", "X-Request-Id", "Content-Disposition"],
   maxAge: 86_400,
 };

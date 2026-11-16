@@ -12,5 +12,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # Opcional: MongoDB local para demonstração (alternativa ao Atlas).
+  # MONGODB_URI=mongodb://localhost:27017
+  mongo:
+    image: mongo:7
+    container_name: echoes-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   postgres_data:
+  mongo_data:

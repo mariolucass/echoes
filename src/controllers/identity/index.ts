@@ -1,1 +1,1 @@
-export { register, login, refresh, currentUser } from "./auth.controller.js";
+export { register, login, refresh, currentUser, verifyTwoFactor } from "./auth.controller.js";

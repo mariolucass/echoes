@@ -6,6 +6,7 @@ import type {
   registerRoute,
   currentUserRoute,
   refreshRoute,
+  verifyTwoFactorRoute,
 } from "../../routes/identity/index.js";
 
 const authService = new AuthService();
@@ -44,4 +45,15 @@ export const currentUser: RouteHandler<
   const user = c.get("authUser");
 
   return c.json(user, 200);
+};
+
+export const verifyTwoFactor: RouteHandler<
+  typeof verifyTwoFactorRoute,
+  AppEnv
+> = async (c) => {
+  const { challengeToken, code } = c.req.valid("json");
+
+  const response = await authService.verifyTwoFactor(challengeToken, code);
+
+  return c.json(response, 200);
 };
