@@ -61,18 +61,21 @@ describe("OpenAPI document", () => {
       },
       "/learning/outcomes/{id}/assessments": { get: expect.any(Object) },
       "/learning/reflections": { get: expect.any(Object) },
+      "/export/csv": { get: expect.any(Object) },
+      "/identity/auth/verify-2fa": { post: expect.any(Object) },
+      "/identity/users/me/avatar": { put: expect.any(Object) },
       "/classification/tags": {
         get: expect.any(Object),
         post: expect.any(Object),
       },
     });
-    expect(Object.keys(document.paths)).toHaveLength(31);
+    expect(Object.keys(document.paths)).toHaveLength(34);
     expect(
       Object.values(document.paths).reduce(
         (count, path) => count + Object.keys(path).length,
         0,
       ),
-    ).toBe(42);
+    ).toBe(45);
     expect(
       Object.keys(document.paths).every((path) => !path.includes(":")),
     ).toBe(true);

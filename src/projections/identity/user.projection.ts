@@ -2,6 +2,7 @@ export const publicUserProjection = {
   id: true,
   name: true,
   email: true,
+  avatarUrl: true,
   createdAt: true,
 } as const;
 

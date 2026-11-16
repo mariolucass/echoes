@@ -452,6 +452,15 @@ GET /health
 
 Retorna `200` quando PostgreSQL, a configuração de autenticação e a gravação dos logs de requisição estão disponíveis; caso contrário, retorna `503` com `status: "degraded"`. O JSON inclui o resultado de cada verificação, tempo da consulta ao banco, horário UTC, ambiente, tempo de atividade, versão do Node.js e uso de memória do processo. Erros internos e segredos não são expostos. A consulta ao banco tem limite de 3 segundos e a resposta não é armazenada em cache. A restrição de acesso aos dias úteis também se aplica a esta rota.
 
+### Exportar decisões (CSV)
+
+```http
+GET /export/csv
+Authorization: Bearer <token>
+```
+
+Retorna as decisões não excluídas do usuário autenticado como arquivo CSV (`Content-Type: text/csv; charset=utf-8`, `Content-Disposition: attachment; filename="echoes-decisoes-AAAA-MM-DD.csv"`). Colunas: `id, titulo, descricao, contexto, status, decidida_em, criada_em, atualizada_em`. Vírgulas, aspas e quebras de linha são escapadas (RFC 4180) e células iniciadas por `=`, `+`, `-` ou `@` recebem prefixo `'` para evitar injeção de fórmulas em planilhas. Sem token válido: `401`.
+
 ### Listar decisões
 
 ```http
@@ -564,6 +573,46 @@ A coleção em `bruno/Echoes` contém exemplos para todas essas rotas. Registre 
 ## Segurança e infraestrutura
 
 A API possui algumas configurações básicas de proteção.
+
+### Segundo fator (2FA por e-mail)
+
+Com `TWO_FACTOR_ENABLED=true` (padrão), `POST /identity/auth/login` valida e-mail e senha e **não** emite tokens: envia um código de 6 dígitos por e-mail (expira em 5 minutos) e responde:
+
+```json
+{ "twoFactorRequired": true, "challengeToken": "eyJ...", "expiresInSeconds": 300 }
+```
+
+Depois, `POST /identity/auth/verify-2fa` com `{ "challengeToken": "eyJ...", "code": "123456" }` retorna a sessão (`accessToken`/`refreshToken`). Código errado, expirado ou token adulterado: `401`; corpo inválido: `422`. O código não é armazenado: o `challengeToken` (JWT) carrega apenas um HMAC dele. Configure `SMTP_*` no `.env`; sem `SMTP_HOST` (fora de produção) o código é escrito no log do servidor.
+
+### Upload de foto de perfil (Cloudinary)
+
+```http
+PUT /identity/users/me/avatar
+Authorization: Bearer <token>
+Content-Type: multipart/form-data   (campo "file": JPEG, PNG ou WebP, até 5 MB)
+```
+
+A imagem vai para o Cloudinary (`CLOUDINARY_*` no `.env`) e somente a URL retornada é salva em `User.avatarUrl`. Retorna o usuário atualizado. Erros: `401` sem token, `422` arquivo ausente, tipo inválido ou acima de 5 MB. Rode `pnpm prisma:deploy` para aplicar a migration da coluna.
+
+### MongoDB Atlas (usuários)
+
+Versão mínima da migração para MongoDB: com `MONGODB_URI` definida (string do cluster no Atlas), **os usuários** (nome, e-mail, hash da senha, avatar) são armazenados na coleção `users` do MongoDB, com índice único em `email`. Cadastro, login, perfil e upload de avatar leem e gravam lá. O PostgreSQL continua guardando decisões, tags e demais domínios, e mantém um registro espelho do usuário (mesmo `id`) só para as chaves estrangeiras. Sem `MONGODB_URI`, tudo roda no PostgreSQL como antes. Para demonstrar localmente sem Atlas: `docker compose up -d mongo` e `MONGODB_URI=mongodb://localhost:27017`.
+
+### CORS
+
+Apenas o próprio servidor é aceito: a origem da requisição precisa ser igual à origem da API (ou `http://localhost:PORT`). Origens extras podem ser liberadas em `CORS_ALLOWED_ORIGINS` (lista separada por vírgula, opcional). Qualquer outra origem não recebe `Access-Control-Allow-Origin`, e o navegador bloqueia a resposta.
+
+### Senhas
+
+As senhas nunca são gravadas em texto puro: `src/utils/password.ts` usa `scrypt` com salt aleatório de 16 bytes, no formato `scrypt:N:r:p:salt:hash`, e a verificação usa comparação em tempo constante. Os logs censuram campos `password` e `token`.
+
+### Testes automatizados
+
+```sh
+pnpm test
+```
+
+Vitest (API compatível com Jest). Testes em `tests/unit/` e `tests/api/`; `tests/api/shared/route-coverage.test.ts` percorre o documento OpenAPI e valida, para cada rota protegida, o `401` sem token ou com token inválido.
 
 ### Rate limiting
 

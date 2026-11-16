@@ -8,6 +8,9 @@ import {
   signAccessToken,
   signRefreshToken,
 } from "../../utils/jwt.js";
+import { env } from "../../config/env.js";
+import { TwoFactorService } from "./two-factor.service.js";
+import { UnauthorizedError } from "../../errors/AppError.js";
 import { hashPassword } from "../../utils/password.js";
 
 type PublicUser = NonNullable<Awaited<ReturnType<UserRepository["findById"]>>>;
@@ -16,6 +19,7 @@ export class AuthService {
   constructor(
     private readonly repository = new UserRepository(),
     private readonly refreshTokens = new RefreshTokenRepository(),
+    private readonly twoFactor = new TwoFactorService(),
   ) {}
 
   async register(input: z.infer<typeof registerSchema>) {
@@ -33,7 +37,18 @@ export class AuthService {
     return this.withToken(user);
   }
 
+  /** With 2FA enabled, returns a challenge instead of a session. */
   async login(user: PublicUser) {
+    if (env.TWO_FACTOR_ENABLED) {
+      return this.twoFactor.issueChallenge(user);
+    }
+    return this.withToken(user);
+  }
+
+  async verifyTwoFactor(challengeToken: string, code: string) {
+    const userId = await this.twoFactor.verify(challengeToken, code);
+    const user = await this.repository.findById(userId);
+    if (!user) throw new UnauthorizedError("Invalid or expired verification code.");
     return this.withToken(user);
   }
 

@@ -23,7 +23,7 @@ app.onError(errorHandler);
 
 const id = "c3cf2108-8bd0-46a1-a24c-4d3af0db3910";
 const createdAt = new Date("2026-09-25T12:00:00.000Z");
-const publicUser = { id, name: "Lucas", email: "lucas@example.com", createdAt };
+const publicUser = { id, name: "Lucas", email: "lucas@example.com", avatarUrl: null, createdAt };
 const originalSecret = env.JWT_SECRET;
 
 type SessionShape = {

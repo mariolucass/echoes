@@ -1,9 +1,10 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   currentUser,
   login,
   register,
   refresh,
+  verifyTwoFactor,
 } from "../../controllers/identity/index.js";
 import type { AppEnv } from "../../interfaces/hono.js";
 import { ErrorCode } from "../../errors/errorCodes.js";
@@ -21,6 +22,8 @@ import {
   publicUserSchema,
   registerSchema,
   refreshSchema,
+  twoFactorChallengeSchema,
+  verifyTwoFactorSchema,
 } from "../../schemas/identity/index.js";
 import { errorResponseSchema } from "../../schemas/shared/index.js";
 
@@ -92,20 +95,51 @@ export const loginRoute = createRoute({
   method: "post",
   path: "/login",
   tags: ["Autenticação"],
-  summary: "Autentica um usuário e emite tokens de acesso e atualização",
+  summary:
+    "Valida e-mail e senha. Com 2FA ativo, envia um código por e-mail e retorna um desafio; confirme em /verify-2fa",
   middleware: [authLimiter, verifyCredentials] as const,
   request: {
     body: { content: { "application/json": { schema: loginSchema } } },
   },
   responses: {
     200: {
-      description: "Usuário autenticado",
-      content: { "application/json": { schema: authResponseSchema } },
+      description: "Sessão emitida (2FA desativado) ou desafio 2FA enviado por e-mail",
+      content: {
+        "application/json": {
+          schema: z.union([authResponseSchema, twoFactorChallengeSchema]),
+        },
+      },
     },
     401: errorResponse(
       "Credenciais inválidas",
       ErrorCode.UNAUTHORIZED,
       "Invalid email or password.",
+    ),
+    422: invalidBody,
+    413: payloadTooLarge,
+    429: tooManyRequests,
+    500: internalError,
+  },
+});
+
+export const verifyTwoFactorRoute = createRoute({
+  method: "post",
+  path: "/verify-2fa",
+  tags: ["Autenticação"],
+  summary: "Confirma o código de 6 dígitos enviado por e-mail e emite os tokens",
+  middleware: [authLimiter] as const,
+  request: {
+    body: { content: { "application/json": { schema: verifyTwoFactorSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Código válido; sessão emitida",
+      content: { "application/json": { schema: authResponseSchema } },
+    },
+    401: errorResponse(
+      "Código inválido ou expirado",
+      ErrorCode.UNAUTHORIZED,
+      "Invalid or expired verification code.",
     ),
     422: invalidBody,
     413: payloadTooLarge,
@@ -173,6 +207,7 @@ export const currentUserRoute = createRoute({
 
 router.openapi(registerRoute, register);
 router.openapi(loginRoute, login);
+router.openapi(verifyTwoFactorRoute, verifyTwoFactor);
 router.openapi(refreshRoute, refresh);
 router.openapi(currentUserRoute, currentUser);
 
