@@ -1,7 +1,9 @@
 import { createHmac, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
 import { jwtVerify, SignJWT } from "jose";
 import { env } from "../../config/env.js";
-import { UnauthorizedError } from "../../errors/AppError.js";
+import { AppError, UnauthorizedError } from "../../errors/AppError.js";
+import { ErrorCode } from "../../errors/errorCodes.js";
+import { logger } from "../../config/logger.js";
 import {
   createMailer,
   type Mailer,
@@ -38,11 +40,19 @@ export class TwoFactorService {
       .setExpirationTime(`${TWO_FACTOR_TTL_SECONDS}s`)
       .sign(secret());
 
-    await this.mailer.send(
-      user.email,
-      "Seu código de verificação Echoes",
-      `Olá, ${user.name}.\n\nSeu código de verificação é ${code}. Ele expira em ${TWO_FACTOR_TTL_SECONDS / 60} minutos.\n\nSe não foi você, ignore este e-mail.`,
-    );
+    try {
+      await this.mailer.send(
+        user.email,
+        "Seu código de verificação Echoes",
+        `Olá, ${user.name}.\n\nSeu código de verificação é ${code}. Ele expira em ${TWO_FACTOR_TTL_SECONDS / 60} minutos.\n\nSe não foi você, ignore este e-mail.`,
+      );
+    } catch (error) {
+      logger.error({ err: error, userId: user.id }, "2FA e-mail delivery failed");
+      throw new AppError(
+        "Não foi possível enviar o código de verificação. Tente novamente em instantes.",
+        { code: ErrorCode.SERVICE_UNAVAILABLE, statusCode: 503 },
+      );
+    }
 
     return {
       twoFactorRequired: true as const,

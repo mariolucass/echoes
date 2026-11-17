@@ -184,7 +184,7 @@ transition: iris | iris-back
   </section>
   <section class="front">
     <h2>Prova e entrega</h2>
-    <div class="it"><span class="k">C</span><div><b>Testes</b><span>221, todas as rotas</span></div></div>
+    <div class="it"><span class="k">C</span><div><b>Testes</b><span>222, todas as rotas</span></div></div>
     <div class="it"><span class="k">D</span><div><b>README</b><span>rotas e configuração</span></div></div>
     <div class="it"><span class="k">H</span><div><b>Exportar</b><span>decisões em CSV</span></div></div>
   </section>
@@ -340,7 +340,7 @@ transition: iris | iris-back
 
 <div class="proof">
   <div>
-    <div class="num"><CountUp :to="221" /></div>
+    <div class="num"><CountUp :to="222" /></div>
     <div class="lbl">testes</div>
     <div class="src">pnpm test</div>
   </div>
