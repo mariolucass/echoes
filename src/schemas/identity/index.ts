@@ -4,4 +4,6 @@ export {
   refreshSchema,
   publicUserSchema,
   authResponseSchema,
+  twoFactorChallengeSchema,
+  verifyTwoFactorSchema,
 } from "./auth.schema.js";

@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { app } from "./app.js";
 import { env } from "./config/env.js";
 import { logger } from "./config/logger.js";
+import { closeMongo, getUsersCollection } from "./database/mongo.js";
 import prisma from "./database/prisma.js";
 import { registerShutdownHandlers } from "./utils/server-lifecycle.js";
 import { registerDecisionSubscribers } from "./subscribers/index.js";
@@ -23,6 +24,11 @@ async function bootstrap() {
     logger.info("Connecting to database");
     await prisma.$connect();
     logger.info("Database connected");
+    if (env.MONGODB_URI) {
+      logger.info("Connecting to MongoDB");
+      await getUsersCollection();
+      logger.info("MongoDB connected");
+    }
     registerDecisionSubscribers();
 
     const server = serve(
@@ -39,7 +45,12 @@ async function bootstrap() {
       },
     );
 
-    registerShutdownHandlers(server, prisma);
+    registerShutdownHandlers(server, {
+      $disconnect: async () => {
+        await prisma.$disconnect();
+        await closeMongo();
+      },
+    });
   } catch (err) {
     logger.fatal({ err }, "Failed to start server");
     try {

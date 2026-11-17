@@ -67,6 +67,10 @@ export const publicUserSchema = z
     id: z.uuid().openapi({ example: "9f1c2e4a-5b6d-4f8e-9a1b-2c3d4e5f6a7b" }),
     name: z.string().openapi({ example: "Ada Lovelace" }),
     email: z.email().openapi({ example: "ada@example.com" }),
+    avatarUrl: z
+      .url()
+      .nullable()
+      .openapi({ example: "https://res.cloudinary.com/demo/image/upload/avatar.jpg" }),
     createdAt: z.iso
       .datetime()
       .openapi({ example: "2026-01-15T10:30:00.000Z" }),
@@ -99,3 +103,22 @@ export const authResponseSchema = z
   .openapi("AuthResponse");
 
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+export const twoFactorChallengeSchema = z
+  .object({
+    twoFactorRequired: z.literal(true),
+    challengeToken: z.string().openapi({ example: "eyJhbGciOiJIUzI1NiIs..." }),
+    expiresInSeconds: z.number().int().openapi({ example: 300 }),
+  })
+  .openapi("TwoFactorChallenge");
+
+export const verifyTwoFactorSchema = z
+  .object({
+    challengeToken: z.string().min(1).max(2048),
+    code: z
+      .string()
+      .regex(/^\d{6}$/, { error: "Código deve ter 6 dígitos" })
+      .openapi({ example: "123456" }),
+  })
+  .strict()
+  .openapi("VerifyTwoFactorRequest");

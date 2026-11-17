@@ -22,6 +22,25 @@ const rawSchema = z.object({
     .transform((value) => value === "true"),
   CORS_ALLOWED_ORIGINS: z.string().default(""),
   APP_BASE_URL: z.url().optional(),
+  MONGODB_URI: z.string().startsWith("mongo").optional(),
+  MONGODB_DB: z.string().default("echoes"),
+  TWO_FACTOR_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true"),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default("Echoes <no-reply@echoes.local>"),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  CLOUDINARY_FOLDER: z.string().default("echoes/avatars"),
 });
 
 const schema = rawSchema.superRefine((data, ctx) => {
@@ -30,6 +49,17 @@ const schema = rawSchema.superRefine((data, ctx) => {
       code: "custom",
       path: ["DATABASE_URL"],
       message: "Set DATABASE_URL in production.",
+    });
+  }
+  if (
+    data.NODE_ENV === "production" &&
+    data.TWO_FACTOR_ENABLED &&
+    !data.SMTP_HOST
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["SMTP_HOST"],
+      message: "Set SMTP_HOST to send 2FA codes in production.",
     });
   }
 });
