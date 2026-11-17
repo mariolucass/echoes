@@ -14,6 +14,10 @@ export class SmtpMailer implements Mailer {
     auth: env.SMTP_USER
       ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
       : undefined,
+    // Sem timeouts o login com 2FA fica pendurado se o SMTP não responde.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   });
 
   async send(to: string, subject: string, text: string) {

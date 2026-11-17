@@ -57,6 +57,20 @@ describe("login with 2FA", () => {
     expect(((await ok.json()) as { session: { accessToken: string } }).session.accessToken).toEqual(expect.any(String));
   });
 
+  it("returns 503 (not a hang or generic 500) when the e-mail cannot be sent", async () => {
+    env.TWO_FACTOR_ENABLED = true;
+    const passwordHash = await hashPassword("Senha@123");
+    vi.spyOn(UserRepository.prototype, "findByEmail").mockResolvedValue({ ...user, passwordHash });
+    vi.spyOn(
+      await import("../../../src/services/notification/mailer.service.js").then((m) => m.ConsoleMailer.prototype),
+      "send",
+    ).mockRejectedValue(new Error("smtp down"));
+
+    const login = await app.request("/identity/auth/login", json({ email: user.email, password: "Senha@123" }));
+    expect(login.status).toBe(503);
+    expect(((await login.json()) as { error: { code: string } }).error.code).toBe("SERVICE_UNAVAILABLE");
+  });
+
   it("validates the verify-2fa body", async () => {
     const response = await app.request("/identity/auth/verify-2fa", json({ challengeToken: "x", code: "12" }));
     expect(response.status).toBe(422);
