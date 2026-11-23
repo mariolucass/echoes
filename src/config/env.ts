@@ -10,6 +10,10 @@ const rawSchema = z.object({
   DATABASE_URL: z.url().optional(),
   JWT_SECRET: z.string().min(32, "Set JWT_SECRET to at least 32 characters."),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
+  RATE_LIMIT_DISABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   API_TIME_ZONE: z
     .string()
     .refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {

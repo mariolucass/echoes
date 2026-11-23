@@ -30,6 +30,9 @@ export function createRateLimiter(
 ): MiddlewareHandler {
   const windows = new Map<string, { count: number; reset: number }>();
   return async (c, next) => {
+    if (env.RATE_LIMIT_DISABLED && env.NODE_ENV !== "production") {
+      return next();
+    }
     const now = Date.now();
     for (const [ip, window] of windows) {
       // New windows are appended and expire in insertion order.

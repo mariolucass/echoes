@@ -7,3 +7,5 @@ process.env.TWO_FACTOR_ENABLED = "false";
 // Vazio (dotenv não sobrescreve) para os testes nunca enviarem e-mail real,
 // mesmo com SMTP_HOST definido no .env do desenvolvedor.
 process.env.SMTP_HOST = "";
+// Fixo para o teste de 429 não depender do .env de quem roda os testes.
+process.env.RATE_LIMIT_DISABLED = "false";
