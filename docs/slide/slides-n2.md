@@ -12,7 +12,7 @@ transition: push | push-back
 
 <div class="cover-credits">
   <span>MÁRIO LUCAS · MOISÉS IATAGAN · JOÃO MARCOS</span>
-  <span>11.11.2026</span>
+  <span>23.11.2026</span>
 </div>
 
 <!--
@@ -184,7 +184,7 @@ transition: iris | iris-back
   </section>
   <section class="front">
     <h2>Prova e entrega</h2>
-    <div class="it"><span class="k">C</span><div><b>Testes</b><span>222, todas as rotas</span></div></div>
+    <div class="it"><span class="k">C</span><div><b>Testes</b><span>239, todas as rotas</span></div></div>
     <div class="it"><span class="k">D</span><div><b>README</b><span>rotas e configuração</span></div></div>
     <div class="it"><span class="k">H</span><div><b>Exportar</b><span>decisões em CSV</span></div></div>
   </section>
@@ -282,7 +282,9 @@ Implementação: src/database/mongo.ts (conexão lazy + índice único), src/rep
 UserRepository escolhe a implementação conforme MONGODB_URI. Se o espelho no Postgres falhar, o insert no Mongo é desfeito.
 Seja honesto: migrar tudo exigiria reescrever ~50 arquivos e perder garantias do PostgreSQL (trigger de imutabilidade da revisão).
 Pergunta provável: "Por que não tudo no Mongo?" Resposta acima.
-Teste real contra o Atlas: faça antes da apresentação.
+Prova ao vivo: página /status (GET /system/integrations) mostra PostgreSQL, MongoDB Atlas e Cloudinary com latência;
+o "teste completo" (POST /system/integrations/roundtrip) grava, lê e apaga no Mongo e sobe, entrega e apaga no Cloudinary.
+Verificado em 23.11: tudo up (Atlas ~50 ms, Cloudinary ~350 ms).
 -->
 
 ---
@@ -340,17 +342,17 @@ transition: iris | iris-back
 
 <div class="proof">
   <div>
-    <div class="num"><CountUp :to="222" /></div>
+    <div class="num"><CountUp :to="239" /></div>
     <div class="lbl">testes</div>
     <div class="src">pnpm test</div>
   </div>
   <div>
-    <div class="num"><CountUp :to="45" /></div>
+    <div class="num"><CountUp :to="48" /></div>
     <div class="lbl">rotas</div>
     <div class="src">no documento OpenAPI</div>
   </div>
   <div>
-    <div class="num"><CountUp :to="30" /></div>
+    <div class="num"><CountUp :to="33" /></div>
     <div class="lbl">arquivos</div>
     <div class="src">de teste</div>
   </div>
@@ -479,7 +481,7 @@ transition: iris | iris-back
 <!--
 [F] Código: src/config/cors.ts (resolveCorsOrigin). Testes: tests/unit/config/cors.test.ts e tests/api/system/cors.test.ts.
 Demo opcional: curl -H "Origin: https://evil.com" -i http://localhost:3333/health e mostre que não há o cabeçalho de permissão.
-Compare com -H "Origin: http://localhost:3333". O pré-voo (OPTIONS) também só responde para a origem permitida.
+Compare com -H "Origin: http://localhost:3333". O pré-voo (OPTIONS) de outra origem volta 204 mas sem Access-Control-Allow-Origin, então o navegador bloqueia.
 -->
 
 ---
@@ -521,7 +523,8 @@ transition: push | push-back
 
 <!--
 [G] Código: src/services/identity/two-factor.service.ts, rota em auth.routes.ts, SMTP via nodemailer (SMTP_* no .env).
-Sem SMTP_HOST fora de produção, o código aparece no log da API (útil como plano B na demo).
+Sem SMTP_HOST fora de produção, o código aparece no log da API. ATENÇÃO: com SMTP_HOST definido e o envio falhando, o login responde 503 (não cai no log).
+A conta demo (POST /identity/auth/demo, DEMO_USER_*) entra sem 2FA, de propósito, para quem só quer ver o app; os demais e-mails seguem com 2FA.
 O challengeToken é um JWT de 5 min com audiência própria; código errado, expirado ou token adulterado = 401.
 Limite honesto: dentro dos 5 minutos o mesmo desafio pode ser reutilizado por quem tem o código; o rate limit de 20 tentativas por IP limita ataques.
 O front-end tem a tela "Código de verificação" depois do login.
@@ -551,7 +554,7 @@ transition: pan | pan-back
   </div>
   <div class="ex-arrow" v-click><IconArrow /></div>
   <div class="ex-file" v-click>
-    <div class="ex-bar"><i></i><i></i><i></i><span>echoes-decisoes-2026-11-11.csv</span></div>
+    <div class="ex-bar"><i></i><i></i><i></i><span>echoes-decisoes-2026-11-23.csv</span></div>
 <pre class="ex-code"><span class="c1">id,titulo,descricao,contexto,status,decidida_em,…</span>
 9f1c2e4a,<mark>"Mudar, ""agora"""</mark>,,,ACTIVE,2026-11-01,…
 b14738e0,Migrar o relatório,,,DRAFT,,…</pre>
@@ -595,6 +598,7 @@ transition: iris | iris-back
 [DEMO] Preparação (faça antes): API e front-end rodando, .env com MONGODB_URI, CLOUDINARY_* e SMTP_*; pnpm prisma:deploy aplicado;
 abas abertas: Atlas (Browse Collections), Cloudinary (Media Library), caixa de e-mail.
 Roteiro:
+0. /status: clique no teste completo; Atlas e Cloudinary respondem ao vivo (A, B).
 1. /register: crie a conta. Atlas → coleção users → mostre o passwordHash (A, E).
 2. Saia e entre em /login: a tela pede o código; pegue-o no e-mail (G).
 3. /profile: envie a foto; abra a URL do Cloudinary e mostre avatarUrl no Atlas (B).
@@ -602,7 +606,8 @@ Roteiro:
 5. Clique em "Exportar" e abra o CSV (H).
 6. Terminal: curl com Origin: https://evil.com e sem o cabeçalho de CORS (F).
 7. Terminal: pnpm test (C). Abra o README e o /reference (D).
-Plano B: se o e-mail não chegar, use o código escrito no log da API. Se a nuvem falhar, mostre os testes e o README.
+Plano B: se o SMTP falhar, deixe SMTP_HOST vazio no .env e reinicie a API: o código passa a sair no log. Ou entre pela conta demo.
+Se a nuvem falhar, mostre /status, os testes e o README.
 -->
 
 ---
@@ -640,4 +645,5 @@ Respostas curtas:
 - "O código do 2FA fica salvo?" Não: o desafio JWT carrega apenas um HMAC; o código vai por e-mail.
 - "O CORS quebra o front?" Não: o Next chama a API pelo servidor, sem CORS no navegador.
 - "A senha pode ser recuperada?" Não: scrypt é de uma via; só se verifica.
+- "A conta demo burla o 2FA?" Só ela, por configuração (DEMO_USER_*), para visitantes; qualquer outro e-mail passa pelo código. Em produção basta não definir as variáveis.
 -->

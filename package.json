@@ -24,6 +24,7 @@
     "slides:build": "slidev build docs/slide/slides.config.md --out dist",
     "slides:export": "slidev export docs/slide/slides.config.md --dark --with-clicks --output docs/slide/exports/echoes.pdf",
     "slides:setup": "playwright install chromium",
+    "seed:demo": "node scripts/ensure-prisma-client.mjs && tsx scripts/seed-demo.ts",
     "prisma:format": "prisma format",
     "prisma:validate": "prisma validate",
     "prisma:generate": "node scripts/ensure-prisma-client.mjs --force",

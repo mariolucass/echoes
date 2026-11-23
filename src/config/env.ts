@@ -10,6 +10,10 @@ const rawSchema = z.object({
   DATABASE_URL: z.url().optional(),
   JWT_SECRET: z.string().min(32, "Set JWT_SECRET to at least 32 characters."),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
+  RATE_LIMIT_DISABLED: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   API_TIME_ZONE: z
     .string()
     .refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
@@ -28,6 +32,9 @@ const rawSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((value) => value === "true"),
+  // Conta demo pública: quando definida, esse e-mail entra sem o 2FA por e-mail.
+  DEMO_USER_EMAIL: z.email().optional(),
+  DEMO_USER_PASSWORD: z.string().min(8).max(128).optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
   SMTP_SECURE: z

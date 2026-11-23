@@ -25,4 +25,6 @@ export const routeErrors = {
 
 export const idParams = z.object({ id: z.uuid() });
 export const decisionFilter = z.object({ decisionId: z.uuid() }).strict();
+/** Sem `decisionId`, a listagem traz os itens de todas as decisões do usuário. */
+export const optionalDecisionFilter = z.object({ decisionId: z.uuid().optional() }).strict();
 export const dateTime = z.iso.datetime({ offset: true });

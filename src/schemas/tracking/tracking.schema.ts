@@ -26,6 +26,13 @@ export const checkpointResponse = z.object({
   updatedAt: z.iso.datetime(),
 });
 
+export const checkpointListItem = checkpointResponse.extend({
+  decision: z.object({
+    id: z.uuid(), title: z.string(),
+    status: z.enum(["DRAFT", "ACTIVE", "COMPLETED", "ABANDONED", "ARCHIVED"]),
+  }),
+});
+
 export const measurementInput = z.object({
   value: decimal,
   recordedAt: dateTime.optional(),

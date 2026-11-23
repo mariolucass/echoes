@@ -3,11 +3,16 @@ import { ownedDecisionFilter } from "../decisions/owned-decision.repository.js";
 import type { z } from "@hono/zod-openapi";
 import type { checkpointInput, checkpointPatch } from "../../schemas/tracking/tracking.schema.js";
 
+/** Teto da listagem por usuário (sem decisionId); por decisão não há corte. */
+const USER_LIST_LIMIT = 300;
+
 export class CheckpointRepository {
-  findManyOwned(userId: string, decisionId: string) {
+  findManyOwned(userId: string, decisionId?: string) {
     return prisma.checkpoint.findMany({
       where: { decisionId, decision: ownedDecisionFilter(userId) },
+      include: { decision: { select: { id: true, title: true, status: true } } },
       orderBy: [{ scheduledFor: "asc" }, { id: "asc" }],
+      take: decisionId ? undefined : USER_LIST_LIMIT,
     });
   }
 

@@ -23,6 +23,27 @@ describe("domain ownership", () => {
     expect(outcomes).not.toHaveBeenCalled();
   });
 
+  it("lists across all owned decisions without checking a single one", async () => {
+    const owned = vi.spyOn(prisma.decision, "findFirst");
+    vi.spyOn(prisma.reflection, "findMany").mockResolvedValue([
+      {
+        id: "r1",
+        decisionId: "d1",
+        content: "Aprendi",
+        satisfactionScore: 8,
+        regretScore: 2,
+        createdAt: new Date("2026-01-01T00:00:00Z"),
+        updatedAt: new Date("2026-01-01T00:00:00Z"),
+        decision: { id: "d1", title: "Mudar", status: "ACTIVE" },
+      },
+    ] as never);
+
+    const list = await LearningService.listReflections("user");
+
+    expect(owned).not.toHaveBeenCalled();
+    expect(list[0]).toMatchObject({ decision: { title: "Mudar" }, createdAt: "2026-01-01T00:00:00.000Z" });
+  });
+
   it("does not attach a tag owned by another user", async () => {
     vi.spyOn(prisma.decision, "findFirst").mockResolvedValue({
       id: "decision",

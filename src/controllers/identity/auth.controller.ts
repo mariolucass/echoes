@@ -7,6 +7,7 @@ import type {
   currentUserRoute,
   refreshRoute,
   verifyTwoFactorRoute,
+  demoRoute,
 } from "../../routes/identity/index.js";
 
 const authService = new AuthService();
@@ -56,4 +57,8 @@ export const verifyTwoFactor: RouteHandler<
   const response = await authService.verifyTwoFactor(challengeToken, code);
 
   return c.json(response, 200);
+};
+
+export const demo: RouteHandler<typeof demoRoute, AppEnv> = async (c) => {
+  return c.json(await authService.demoSession(), 200);
 };

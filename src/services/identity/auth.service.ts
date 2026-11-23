@@ -9,8 +9,9 @@ import {
   signRefreshToken,
 } from "../../utils/jwt.js";
 import { env } from "../../config/env.js";
+import { DemoAccountService } from "./demo-account.service.js";
 import { TwoFactorService } from "./two-factor.service.js";
-import { UnauthorizedError } from "../../errors/AppError.js";
+import { NotFoundError, UnauthorizedError } from "../../errors/AppError.js";
 import { hashPassword } from "../../utils/password.js";
 
 type PublicUser = NonNullable<Awaited<ReturnType<UserRepository["findById"]>>>;
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly repository = new UserRepository(),
     private readonly refreshTokens = new RefreshTokenRepository(),
     private readonly twoFactor = new TwoFactorService(),
+    private readonly demoAccount = new DemoAccountService(),
   ) {}
 
   async register(input: z.infer<typeof registerSchema>) {
@@ -39,9 +41,20 @@ export class AuthService {
 
   /** With 2FA enabled, returns a challenge instead of a session. */
   async login(user: PublicUser) {
-    if (env.TWO_FACTOR_ENABLED) {
+    const isDemoUser =
+      env.DEMO_USER_EMAIL !== undefined &&
+      user.email.toLowerCase() === env.DEMO_USER_EMAIL.toLowerCase();
+    if (env.TWO_FACTOR_ENABLED && !isDemoUser) {
       return this.twoFactor.issueChallenge(user);
     }
+    return this.withToken(user);
+  }
+
+  /** Sessão da conta demo pública; cria a conta e os dados de exemplo se ainda não existirem. */
+  async demoSession() {
+    if (!this.demoAccount.enabled) throw new NotFoundError("Demo account is not enabled.");
+    const { user } = await this.demoAccount.ensure();
+    if (!user) throw new NotFoundError("Demo account is not enabled.");
     return this.withToken(user);
   }
 

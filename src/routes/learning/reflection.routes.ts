@@ -4,9 +4,9 @@ import {
   protectedRoute,
   routeErrors,
   idParams,
-  decisionFilter,
+  optionalDecisionFilter,
 } from "../shared/domain-routes.js";
-import { reflectionResponse } from "../../schemas/learning/learning.schema.js";
+import { reflectionListItem, reflectionResponse } from "../../schemas/learning/learning.schema.js";
 import { listReflections, getReflection } from "../../controllers/learning/reflection.controller.js";
 import { defaultHook } from "../../utils/openapi-hook.js";
 
@@ -18,11 +18,11 @@ export const listReflectionsRoute = createRoute({
   tags: ["Learning"],
   summary: "Lista reflexões de uma decisão",
   ...protectedRoute,
-  request: { query: decisionFilter },
+  request: { query: optionalDecisionFilter },
   responses: {
     200: {
       description: "Reflexões",
-      content: { "application/json": { schema: reflectionResponse.array() } },
+      content: { "application/json": { schema: reflectionListItem.array() } },
     },
     ...routeErrors,
   },

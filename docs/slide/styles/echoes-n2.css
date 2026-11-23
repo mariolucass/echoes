@@ -711,3 +711,27 @@ html[data-deck="n2"] .slidev-layout.conference.conference--livecode h1 {
 html[data-deck="n2"] .brief-row { padding: 24px 0 26px; }
 html[data-deck="n2"] .brief-row p { font-size: 25px; }
 html[data-deck="n2"] .brief { margin-top: 18px; }
+
+/* PDF enxuto: sem filtros, ruído, sombras e animações (evita rasterização). Só vale na exportação (Slidev põe html.print). */
+@media all {
+  html.print[data-deck="n2"] *,
+  html.print[data-deck="n2"] *::before,
+  html.print[data-deck="n2"] *::after {
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    mask-image: none !important;
+    -webkit-mask: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  html.print[data-deck="n2"] .slidev-vclick-hidden { opacity: 1 !important; transform: none !important; }
+  html.print[data-deck="n2"] *,
+  html.print[data-deck="n2"] *::before,
+  html.print[data-deck="n2"] *::after { mix-blend-mode: normal !important; }
+  html.print[data-deck="n2"] .deck-fx,
+  html.print[data-deck="n2"] .slidev-layout.conference::after { display: none !important; }
+}
