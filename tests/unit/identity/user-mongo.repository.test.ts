@@ -20,7 +20,11 @@ function setup(insertError?: unknown) {
       return d;
     }),
   };
-  const mirror = { create: vi.fn().mockResolvedValue({}), update: vi.fn().mockResolvedValue({}) };
+  const mirror = {
+    create: vi.fn().mockResolvedValue({}),
+    update: vi.fn().mockResolvedValue({}),
+    upsert: vi.fn().mockResolvedValue({}),
+  };
   const repo = new MongoUserRepository(async () => collection as never, mirror as never);
   return { repo, collection, mirror, docs };
 }
@@ -58,5 +62,20 @@ describe("MongoUserRepository", () => {
     expect((await repo.updateAvatar(id, "https://x/y.png")).avatarUrl).toBe("https://x/y.png");
     expect(mirror.update).toHaveBeenCalledTimes(2);
     expect(await repo.findByEmail("nope@x.com")).toBeNull();
+  });
+
+  it("recreates a missing PostgreSQL mirror from the Mongo document", async () => {
+    const { repo, mirror } = setup();
+    const { id } = await repo.create(input);
+    await repo.ensureMirror(id);
+    expect(mirror.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id },
+        create: expect.objectContaining({ id, email: input.email, passwordHash: "scrypt:h" }),
+        update: {},
+      }),
+    );
+    await repo.ensureMirror("missing");
+    expect(mirror.upsert).toHaveBeenCalledTimes(1);
   });
 });
