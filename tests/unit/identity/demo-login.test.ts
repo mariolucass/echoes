@@ -8,7 +8,7 @@ function setup() {
   const issueChallenge = vi.fn().mockResolvedValue({ twoFactorRequired: true });
   const create = vi.fn().mockResolvedValue(undefined);
   const service = new AuthService(
-    {} as never,
+    { ensureMirror: vi.fn().mockResolvedValue(undefined) } as never,
     { create } as never,
     { issueChallenge } as never,
   );

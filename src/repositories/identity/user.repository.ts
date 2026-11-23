@@ -44,6 +44,9 @@ class PrismaUserRepository {
       select: publicUserProjection,
     });
   }
+
+  /** PostgreSQL is the source of truth here: there is no mirror to repair. */
+  async ensureMirror(_id: string) {}
 }
 
 /** MongoDB Atlas when MONGODB_URI is set; PostgreSQL (Prisma) otherwise. */
@@ -69,5 +72,8 @@ export class UserRepository {
   }
   updateAvatar(id: string, avatarUrl: string) {
     return this.impl.updateAvatar(id, avatarUrl);
+  }
+  ensureMirror(id: string) {
+    return this.impl.ensureMirror(id);
   }
 }

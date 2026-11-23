@@ -15,7 +15,7 @@ const toPublic = ({ _id, name, email, avatarUrl, createdAt }: UserDocument) => (
 const isDuplicateKey = (error: unknown) =>
   typeof error === "object" && error !== null && (error as { code?: number }).code === 11000;
 
-type Mirror = Pick<typeof prisma.user, "create" | "update">;
+type Mirror = Pick<typeof prisma.user, "create" | "update" | "upsert">;
 
 /**
  * Users live in MongoDB (source of truth). A mirror row with the same id is kept
@@ -68,6 +68,22 @@ export class MongoUserRepository {
   async findById(id: string) {
     const doc = await (await this.collection()).findOne({ _id: id });
     return doc ? toPublic(doc) : null;
+  }
+
+  /**
+   * Recreates the PostgreSQL mirror if it is missing (e.g. after switching databases),
+   * so writes with a foreign key to User (refresh tokens, decisions) don't fail with P2003.
+   */
+  async ensureMirror(id: string) {
+    const doc = await (await this.collection()).findOne({ _id: id });
+    if (!doc) return;
+    const { name, email, passwordHash, avatarUrl, createdAt } = doc;
+    await this.mirror.upsert({
+      where: { id },
+      create: { id, name, email, passwordHash, avatarUrl, createdAt },
+      update: {},
+      select: { id: true },
+    });
   }
 
   async updateName(id: string, name: string) {
