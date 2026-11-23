@@ -3,6 +3,7 @@ import prisma from "../../../src/database/prisma.js";
 import { CheckpointRepository } from "../../../src/repositories/tracking/checkpoint.repository.js";
 import { MetricRepository } from "../../../src/repositories/tracking/metric.repository.js";
 import { OutcomeRepository } from "../../../src/repositories/learning/outcome.repository.js";
+import { ReflectionRepository } from "../../../src/repositories/learning/reflection.repository.js";
 import { TagRepository } from "../../../src/repositories/classification/tag.repository.js";
 
 afterEach(() => vi.restoreAllMocks());
@@ -33,6 +34,34 @@ describe("domain repositories", () => {
         },
       }),
     );
+  });
+
+  it("lists every owned item with the decision title when decisionId is omitted", async () => {
+    const checkpoints = vi.spyOn(prisma.checkpoint, "findMany").mockResolvedValue([]);
+    const outcomes = vi.spyOn(prisma.outcome, "findMany").mockResolvedValue([]);
+    const reflections = vi.spyOn(prisma.reflection, "findMany").mockResolvedValue([]);
+
+    await new CheckpointRepository().findManyOwned("user-1");
+    await new OutcomeRepository().findManyOwned("user-1");
+    await new ReflectionRepository().findManyOwned("user-1");
+
+    for (const spy of [checkpoints, outcomes, reflections]) {
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { decisionId: undefined, decision: { userId: "user-1", deletedAt: null } },
+          take: 300,
+        }),
+      );
+    }
+    expect(checkpoints.mock.calls[0]?.[0]).toMatchObject({
+      include: { decision: { select: { id: true, title: true, status: true } } },
+    });
+  });
+
+  it("keeps per-decision lists uncapped", async () => {
+    const checkpoints = vi.spyOn(prisma.checkpoint, "findMany").mockResolvedValue([]);
+    await new CheckpointRepository().findManyOwned("user-1", "decision-1");
+    expect(checkpoints.mock.calls[0]?.[0]).toMatchObject({ where: { decisionId: "decision-1" }, take: undefined });
   });
 
   it("scopes assessments through the outcome's decision", async () => {

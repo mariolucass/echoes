@@ -4,6 +4,7 @@ import { env } from "../../config/env.js";
 import { AppError, UnauthorizedError } from "../../errors/AppError.js";
 import { ErrorCode } from "../../errors/errorCodes.js";
 import { logger } from "../../config/logger.js";
+import { renderTwoFactorEmail } from "../notification/templates/two-factor-email.js";
 import {
   createMailer,
   type Mailer,
@@ -41,11 +42,14 @@ export class TwoFactorService {
       .sign(secret());
 
     try {
-      await this.mailer.send(
-        user.email,
-        "Seu código de verificação Echoes",
-        `Olá, ${user.name}.\n\nSeu código de verificação é ${code}. Ele expira em ${TWO_FACTOR_TTL_SECONDS / 60} minutos.\n\nSe não foi você, ignore este e-mail.`,
-      );
+      const email = renderTwoFactorEmail({
+        name: user.name,
+        email: user.email,
+        code,
+        ttlMinutes: TWO_FACTOR_TTL_SECONDS / 60,
+        timeZone: env.API_TIME_ZONE,
+      });
+      await this.mailer.send(user.email, email.subject, email.text, email.html);
     } catch (error) {
       logger.error({ err: error, userId: user.id }, "2FA e-mail delivery failed");
       throw new AppError(

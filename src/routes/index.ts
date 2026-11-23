@@ -4,7 +4,7 @@ import { tagRoutes } from "./classification/index.js";
 import { decisionRoutes, expectationRoutes, decisionTagRoutes } from "./decisions/index.js";
 import { userRoutes, authRoutes } from "./identity/index.js";
 import { outcomeRoutes, reflectionRoutes } from "./learning/index.js";
-import { exportRoutes, healthRoutes, requestLogsRoutes } from "./system/index.js";
+import { exportRoutes, healthRoutes, integrationsRoutes, requestLogsRoutes } from "./system/index.js";
 import { checkpointRoutes, metricRoutes } from "./tracking/index.js";
 
 export {
@@ -13,6 +13,7 @@ export {
   expectationRoutes,
   exportRoutes,
   healthRoutes,
+  integrationsRoutes,
   metricRoutes,
   outcomeRoutes,
   reflectionRoutes,

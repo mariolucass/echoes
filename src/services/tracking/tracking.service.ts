@@ -65,8 +65,8 @@ async function requireCheckpointWritable(userId: string, decisionId: string) {
 }
 
 export const TrackingService = {
-  async listCheckpoints(userId: string, decisionId: string) {
-    await requireOwnedDecision(userId, decisionId);
+  async listCheckpoints(userId: string, decisionId?: string) {
+    if (decisionId) await requireOwnedDecision(userId, decisionId);
     const data = await checkpoints.findManyOwned(userId, decisionId);
 
     return data.map(checkpointView);

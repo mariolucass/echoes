@@ -598,6 +598,15 @@ A imagem vai para o Cloudinary (`CLOUDINARY_*` no `.env`) e somente a URL retorn
 
 Versão mínima da migração para MongoDB: com `MONGODB_URI` definida (string do cluster no Atlas), **os usuários** (nome, e-mail, hash da senha, avatar) são armazenados na coleção `users` do MongoDB, com índice único em `email`. Cadastro, login, perfil e upload de avatar leem e gravam lá. O PostgreSQL continua guardando decisões, tags e demais domínios, e mantém um registro espelho do usuário (mesmo `id`) só para as chaves estrangeiras. Sem `MONGODB_URI`, tudo roda no PostgreSQL como antes. Para demonstrar localmente sem Atlas: `docker compose up -d mongo` e `MONGODB_URI=mongodb://localhost:27017`.
 
+### Status das integrações
+
+```http
+GET  /system/integrations
+POST /system/integrations/roundtrip
+```
+
+Ambas exigem token. A primeira faz ping em PostgreSQL, MongoDB e Cloudinary e devolve status e latência de cada um, sem expor URIs nem segredos. A segunda é um teste real de ida e volta: grava, lê e apaga um documento no MongoDB e sobe, entrega pela CDN e apaga uma imagem 1×1 no Cloudinary (limite próprio de 10 execuções por IP). No front-end, a página `/status` mostra os dois.
+
 ### CORS
 
 Apenas o próprio servidor é aceito: a origem da requisição precisa ser igual à origem da API (ou `http://localhost:PORT`). Origens extras podem ser liberadas em `CORS_ALLOWED_ORIGINS` (lista separada por vírgula, opcional). Qualquer outra origem não recebe `Access-Control-Allow-Origin`, e o navegador bloqueia a resposta.
@@ -676,3 +685,13 @@ A estrutura base da API e do banco de dados já está preparada para a implement
 ```text
 Decision → Expectation → Checkpoint → Outcome → Reflection
 ```
+
+---
+
+## Conta demo pública
+
+Para um ambiente público (ex.: frontend no Vercel) existe uma conta demo com decisões de exemplo:
+
+1. Na API, defina `DEMO_USER_EMAIL` e `DEMO_USER_PASSWORD`. Isso liga `POST /identity/auth/demo`, que abre a sessão da conta demo **sem 2FA** (os demais e-mails continuam com 2FA) e **cria a conta e as decisões de exemplo sozinho** se ainda não existirem ou se a conta estiver vazia.
+2. No frontend, defina `DEMO_ENABLED=true` (só servidor) para exibir "Explorar com a conta demo" no login e no cadastro.
+3. Opcional: `pnpm seed:demo` semeia antes do primeiro clique ou restaura os dados originais (recria só as decisões/tags da conta demo).

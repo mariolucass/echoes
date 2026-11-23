@@ -1,6 +1,7 @@
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   currentUser,
+  demo,
   login,
   register,
   refresh,
@@ -122,6 +123,28 @@ export const loginRoute = createRoute({
   },
 });
 
+export const demoRoute = createRoute({
+  method: "post",
+  path: "/demo",
+  tags: ["Autenticação"],
+  summary:
+    "Abre uma sessão na conta demo pública (sem 2FA), criando a conta e os dados de exemplo se faltarem. Só existe com DEMO_USER_EMAIL e DEMO_USER_PASSWORD definidos",
+  middleware: [authLimiter] as const,
+  responses: {
+    200: {
+      description: "Sessão da conta demo emitida",
+      content: { "application/json": { schema: authResponseSchema } },
+    },
+    404: errorResponse(
+      "Conta demo desativada neste ambiente",
+      ErrorCode.NOT_FOUND,
+      "Demo account is not enabled.",
+    ),
+    429: tooManyRequests,
+    500: internalError,
+  },
+});
+
 export const verifyTwoFactorRoute = createRoute({
   method: "post",
   path: "/verify-2fa",
@@ -207,6 +230,7 @@ export const currentUserRoute = createRoute({
 
 router.openapi(registerRoute, register);
 router.openapi(loginRoute, login);
+router.openapi(demoRoute, demo);
 router.openapi(verifyTwoFactorRoute, verifyTwoFactor);
 router.openapi(refreshRoute, refresh);
 router.openapi(currentUserRoute, currentUser);
