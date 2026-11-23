@@ -45,9 +45,19 @@ async function ownedOutcome(userId: string, id: string) {
 }
 
 export const LearningService = {
-  async listOutcomes(userId: string, decisionId: string) {
-    await requireOwnedDecision(userId, decisionId);
-    return (await outcomes.findManyOwned(userId, decisionId)).map(outcomeView);
+  async listOutcomes(userId: string, decisionId?: string) {
+    if (decisionId) await requireOwnedDecision(userId, decisionId);
+    return (await outcomes.findManyOwned(userId, decisionId)).map(
+      ({ decision: { expectations, ...decision }, assessments, ...item }) => ({
+        ...outcomeView(item),
+        decision,
+        expectations: expectations.map((e) => ({
+          ...e,
+          expectedImpact: e.expectedImpact?.toString() ?? null,
+        })),
+        assessments,
+      }),
+    );
   },
 
   async getOutcome(userId: string, id: string) {
@@ -65,8 +75,8 @@ export const LearningService = {
     );
   },
 
-  async listReflections(userId: string, decisionId: string) {
-    await requireOwnedDecision(userId, decisionId);
+  async listReflections(userId: string, decisionId?: string) {
+    if (decisionId) await requireOwnedDecision(userId, decisionId);
     return (await reflections.findManyOwned(userId, decisionId)).map(
       reflectionView,
     );

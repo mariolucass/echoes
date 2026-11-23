@@ -4,11 +4,12 @@ import {
   protectedRoute,
   routeErrors,
   idParams,
-  decisionFilter,
+  optionalDecisionFilter,
 } from "../shared/domain-routes.js";
 import {
   checkpointInput,
   checkpointPatch,
+  checkpointListItem,
   checkpointResponse,
 } from "../../schemas/tracking/tracking.schema.js";
 import { listCheckpoints, createCheckpoint, getCheckpoint, patchCheckpoint, deleteCheckpoint } from "../../controllers/tracking/checkpoint.controller.js";
@@ -24,11 +25,11 @@ export const listCheckpointsRoute = createRoute({
   tags: ["Tracking"],
   summary: "Lista checkpoints de uma decisão",
   ...protectedRoute,
-  request: { query: decisionFilter },
+  request: { query: optionalDecisionFilter },
   responses: {
     200: {
       description: "Checkpoints",
-      content: { "application/json": { schema: checkpointResponse.array() } },
+      content: { "application/json": { schema: checkpointListItem.array() } },
     },
     ...routeErrors,
   },

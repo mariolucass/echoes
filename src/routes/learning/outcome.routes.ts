@@ -4,9 +4,10 @@ import {
   protectedRoute,
   routeErrors,
   idParams,
-  decisionFilter,
+  optionalDecisionFilter,
 } from "../shared/domain-routes.js";
 import {
+  outcomeListItem,
   outcomeResponse,
   assessmentResponse,
 } from "../../schemas/learning/learning.schema.js";
@@ -20,11 +21,11 @@ export const listOutcomesRoute = createRoute({
   tags: ["Learning"],
   summary: "Lista resultados de uma decisão",
   ...protectedRoute,
-  request: { query: decisionFilter },
+  request: { query: optionalDecisionFilter },
   responses: {
     200: {
       description: "Resultados",
-      content: { "application/json": { schema: outcomeResponse.array() } },
+      content: { "application/json": { schema: outcomeListItem.array() } },
     },
     ...routeErrors,
   },
