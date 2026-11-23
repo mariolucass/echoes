@@ -15,7 +15,7 @@ describe("TwoFactorService", () => {
   it("emails a 6-digit code and returns a challenge without the code", async () => {
     const { send, service, codeFrom } = setup();
     const challenge = await service.issueChallenge(user);
-    expect(send).toHaveBeenCalledWith(user.email, expect.any(String), expect.any(String));
+    expect(send).toHaveBeenCalledWith(user.email, expect.any(String), expect.any(String), expect.stringContaining("<html"));
     expect(codeFrom()).toMatch(/^\d{6}$/);
     expect(challenge.twoFactorRequired).toBe(true);
     expect(JSON.stringify(challenge)).not.toContain(codeFrom());

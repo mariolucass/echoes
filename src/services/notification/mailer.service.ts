@@ -3,7 +3,7 @@ import { env } from "../../config/env.js";
 import { logger } from "../../config/logger.js";
 
 export interface Mailer {
-  send(to: string, subject: string, text: string): Promise<void>;
+  send(to: string, subject: string, text: string, html?: string): Promise<void>;
 }
 
 export class SmtpMailer implements Mailer {
@@ -20,8 +20,8 @@ export class SmtpMailer implements Mailer {
     socketTimeout: 15_000,
   });
 
-  async send(to: string, subject: string, text: string) {
-    await this.transport.sendMail({ from: env.SMTP_FROM, to, subject, text });
+  async send(to: string, subject: string, text: string, html?: string) {
+    await this.transport.sendMail({ from: env.SMTP_FROM, to, subject, text, html });
   }
 }
 
