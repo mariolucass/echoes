@@ -84,6 +84,7 @@ export class AuthService {
   private async withToken(user: Awaited<ReturnType<UserRepository["create"]>>) {
     const refreshToken = await signRefreshToken(user.id);
     const refreshTokenExpiresAt = tokenExpiry(refreshToken);
+    await this.repository.ensureMirror(user.id);
     await this.refreshTokens.create(
       user.id,
       hashRefreshToken(refreshToken),
