@@ -1,0 +1,19 @@
+[tools]
+node = "24"
+pnpm = "12"
+
+[tasks.setup]
+description = "Instala as dependências"
+run = "pnpm install"
+
+[tasks.dev]
+description = "API em modo watch"
+run = "pnpm dev"
+
+[tasks.test]
+description = "Testes unit + api"
+run = "pnpm test"
+
+[tasks.lint]
+description = "Typecheck dos testes"
+run = "pnpm test:typecheck"
