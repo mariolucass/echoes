@@ -17,6 +17,7 @@ import {
   decisionsRoutes,
   exportRoutes,
   healthRoutes,
+  integrationsRoutes,
   identityRoutes,
   learningRoutes,
   requestLogsRoutes,
@@ -40,6 +41,7 @@ bootstrapOpenApiSecurity(app);
 
 app.route("/request-logs", requestLogsRoutes);
 app.route("/export", exportRoutes);
+app.route("/system/integrations", integrationsRoutes);
 
 app.route("/identity/auth", authRoutes);
 app.route("/identity", identityRoutes);

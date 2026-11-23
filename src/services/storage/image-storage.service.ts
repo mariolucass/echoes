@@ -6,6 +6,15 @@ import { ErrorCode } from "../../errors/errorCodes.js";
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+/** Cloudinary signature: params sorted by key, joined as k=v&..., plus the API secret, SHA-1. */
+export function signCloudinary(params: Record<string, string>, secret: string) {
+  const toSign = Object.entries(params)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join("&");
+  return createHash("sha1").update(toSign + secret).digest("hex");
+}
+
 export interface ImageStorage {
   upload(file: File, publicId: string): Promise<string>;
 }
@@ -28,13 +37,7 @@ export class CloudinaryStorage implements ImageStorage {
       public_id: publicId,
       timestamp,
     };
-    const toSign = Object.entries(params)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, v]) => `${k}=${v}`)
-      .join("&");
-    const signature = createHash("sha1")
-      .update(toSign + CLOUDINARY_API_SECRET)
-      .digest("hex");
+    const signature = signCloudinary(params, CLOUDINARY_API_SECRET);
 
     const form = new FormData();
     form.set("file", file);

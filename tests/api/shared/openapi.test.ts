@@ -68,14 +68,16 @@ describe("OpenAPI document", () => {
         get: expect.any(Object),
         post: expect.any(Object),
       },
+      "/system/integrations": { get: expect.any(Object) },
+      "/system/integrations/roundtrip": { post: expect.any(Object) },
     });
-    expect(Object.keys(document.paths)).toHaveLength(34);
+    expect(Object.keys(document.paths)).toHaveLength(37);
     expect(
       Object.values(document.paths).reduce(
         (count, path) => count + Object.keys(path).length,
         0,
       ),
-    ).toBe(45);
+    ).toBe(48);
     expect(
       Object.keys(document.paths).every((path) => !path.includes(":")),
     ).toBe(true);
