@@ -32,6 +32,9 @@ const rawSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((value) => value === "true"),
+  // Conta demo pública: quando definida, esse e-mail entra sem o 2FA por e-mail.
+  DEMO_USER_EMAIL: z.email().optional(),
+  DEMO_USER_PASSWORD: z.string().min(8).max(128).optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
   SMTP_SECURE: z
